@@ -1,0 +1,816 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calaye Store — Digital Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#00A86B;--green-light:#E6F7F1;--green-dark:#007A4D;
+  --orange:#FF6B2B;--orange-light:#FFF0EA;
+  --bg:#F5F5F5;--white:#fff;--card:#fff;
+  --text:#1A1A1A;--muted:#888;--border:#EBEBEB;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+  --radius:12px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+header{background:var(--green);padding:0 5%;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,168,107,0.3)}
+.header-top{display:flex;align-items:center;gap:16px;padding:14px 0}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-box{width:38px;height:38px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.5px}
+.logo-name span{color:#FBBF24}
+.search-bar{flex:1;display:flex;background:#fff;border-radius:8px;overflow:hidden;max-width:520px}
+.search-bar input{flex:1;padding:10px 16px;border:none;outline:none;font-family:'Inter',sans-serif;font-size:14px;color:var(--text)}
+.search-bar button{padding:10px 18px;background:var(--orange);border:none;cursor:pointer;color:#fff;font-size:15px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:20px}
+.wa-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;transition:.2s}
+.wa-btn:hover{background:rgba(255,255,255,0.25)}
+
+/* ── BANNER ── */
+.banner{background:linear-gradient(135deg,#00A86B 0%,#007A4D 60%,#005C3A 100%);padding:32px 5%;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.banner-text h1{font-size:2rem;font-weight:800;color:#fff;line-height:1.25;margin-bottom:8px}
+.banner-text h1 em{font-style:normal;color:#FBBF24}
+.banner-text p{color:rgba(255,255,255,0.8);font-size:1rem;margin-bottom:20px}
+.banner-stats{display:flex;gap:24px}
+.stat{text-align:center}
+.stat-num{font-size:1.4rem;font-weight:800;color:#fff}
+.stat-label{font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:2px}
+.banner-badges{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.badge-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);padding:10px 16px;border-radius:50px;color:#fff;font-size:0.85rem;font-weight:600;border:1px solid rgba(255,255,255,0.2)}
+.badge-pill i{color:#FBBF24}
+
+/* ── KATEGORI ── */
+.section{padding:20px 5%}
+.section-title{font-size:1.05rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:4px;height:18px;background:var(--green);border-radius:2px;display:block}
+.cat-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-pill{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:50px;border:1.5px solid var(--border);background:#fff;cursor:pointer;white-space:nowrap;font-size:0.85rem;font-weight:600;color:var(--muted);transition:.2s;flex-shrink:0}
+.cat-pill.active,.cat-pill:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.cat-pill i{font-size:13px}
+
+/* ── PRODUCT GRID ── */
+.products-section{padding:0 5% 40px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px}
+
+.prod-card{background:#fff;border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .25s;border:1.5px solid transparent;box-shadow:var(--shadow)}
+.prod-card:hover{border-color:var(--green);box-shadow:0 6px 20px rgba(0,168,107,0.12);transform:translateY(-3px)}
+.prod-banner{height:110px;position:relative;background:#eee;overflow:hidden}
+.prod-banner img{width:100%;height:100%;object-fit:cover}
+.prod-banner-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.prod-badge{position:absolute;top:8px;left:8px;padding:3px 9px;border-radius:20px;font-size:0.7rem;font-weight:700;backdrop-filter:blur(8px)}
+.badge-instan{background:rgba(0,168,107,0.9);color:#fff}
+.badge-hot{background:rgba(255,107,43,0.9);color:#fff}
+.prod-body{padding:12px}
+.prod-icon-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.prod-icon{width:36px;height:36px;border-radius:10px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.prod-icon img{width:100%;height:100%;object-fit:cover}
+.prod-name{font-size:0.9rem;font-weight:700;line-height:1.3}
+.prod-desc{font-size:0.75rem;color:var(--muted);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-price-row{display:flex;align-items:center;justify-content:space-between}
+.prod-price{color:var(--green);font-weight:700;font-size:0.9rem}
+.prod-cta{background:var(--green-light);color:var(--green);font-size:0.72rem;font-weight:700;padding:5px 10px;border-radius:6px}
+
+/* ── ORDER SECTION ── */
+.order-wrap{padding:20px 5% 60px;max-width:860px;margin:0 auto;display:none}
+.order-wrap.active{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--muted);margin-bottom:16px}
+.breadcrumb a{color:var(--green);text-decoration:none;font-weight:600;cursor:pointer}
+.breadcrumb i{font-size:10px}
+
+.order-layout{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+.order-main,.order-side{display:flex;flex-direction:column;gap:14px}
+
+.ocard{background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.ocard-title{font-size:0.9rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.ocard-title i{color:var(--green)}
+
+/* product header in order */
+.order-prod-header{display:flex;gap:14px;align-items:center}
+.order-prod-img{width:64px;height:64px;border-radius:14px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.order-prod-img img{width:100%;height:100%;object-fit:cover}
+.order-prod-name{font-size:1.1rem;font-weight:800}
+.order-prod-sub{color:var(--muted);font-size:0.85rem;margin-top:3px}
+
+/* form */
+.form-row{margin-bottom:14px}
+.form-label{font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.form-label i{color:var(--green);font-size:13px}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);transition:.2s;background:#fff}
+.form-input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,168,107,0.1)}
+.hint{font-size:0.75rem;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:5px}
+.hint i{color:var(--orange);font-size:11px}
+
+/* denom grid */
+.denom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px}
+.denom-item{border:1.5px solid var(--border);border-radius:10px;padding:13px 12px;cursor:pointer;transition:.2s;position:relative;background:#fff}
+.denom-item:hover{border-color:var(--green);background:var(--green-light)}
+.denom-item.selected{border-color:var(--green);background:var(--green-light)}
+.denom-item.selected::after{content:'✓';position:absolute;top:7px;right:9px;font-size:11px;color:var(--green);font-weight:800}
+.di-amount{font-size:0.85rem;font-weight:700;color:var(--text)}
+.di-price{font-size:0.9rem;font-weight:800;color:var(--green);margin-top:3px}
+.di-bonus{font-size:0.68rem;font-weight:700;color:var(--orange);margin-top:2px;background:var(--orange-light);display:inline-block;padding:2px 6px;border-radius:4px}
+
+/* payment */
+.pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.pay-item{border:1.5px solid var(--border);border-radius:10px;padding:13px 8px;text-align:center;cursor:pointer;transition:.2s;background:#fff}
+.pay-item:hover,.pay-item.selected{border-color:var(--green);background:var(--green-light)}
+.pay-icon{font-size:1.5rem;color:var(--green);margin-bottom:5px}
+.pay-name{font-size:0.75rem;font-weight:700}
+
+/* summary */
+.sum-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.87rem}
+.sum-row:last-of-type{border:none}
+.sum-label{color:var(--muted)}
+.sum-total{display:flex;justify-content:space-between;padding:12px 0 4px;font-size:1.05rem;font-weight:800;color:var(--green)}
+.btn-order{width:100%;padding:15px;background:var(--green);border:none;border-radius:10px;color:#fff;font-size:1rem;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s;margin-top:12px;box-shadow:0 4px 14px rgba(0,168,107,0.35)}
+.btn-order:hover{background:var(--green-dark);transform:translateY(-2px)}
+.btn-order i{font-size:1.1rem}
+
+/* trust badges */
+.trust-row{display:flex;flex-direction:column;gap:8px}
+.trust-item{display:flex;align-items:center;gap:10px;font-size:0.8rem;color:var(--muted)}
+.trust-item i{color:var(--green);font-size:1rem;width:20px;text-align:center}
+
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:12px 24px;border-radius:50px;font-size:0.88rem;font-weight:600;z-index:999;opacity:0;transition:.35s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.error{background:#E53E3E}
+
+/* footer */
+footer{background:#fff;border-top:1px solid var(--border);padding:28px 5%;text-align:center}
+.footer-logo{font-size:1.2rem;font-weight:800;color:var(--green);margin-bottom:6px}
+.footer-logo span{color:var(--orange)}
+footer p{color:var(--muted);font-size:0.82rem}
+
+/* empty state */
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty i{font-size:3rem;opacity:.3;margin-bottom:12px;display:block}
+
+@media(max-width:768px){
+  .banner{flex-direction:column}
+  .banner-badges{flex-direction:row;flex-wrap:wrap}
+  .order-layout{grid-template-columns:1fr}
+  .header-right{display:none}
+  .search-bar{max-width:none}
+  .product-grid{grid-template-columns:repeat(2,1fr)}
+  .banner-text h1{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <a class="logo" href="#">
+      <div class="logo-box"></div>
+      <span class="logo-name">Calaye<span>Store</span></span>
+    </a>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Cari produk digital..." oninput="handleSearch()">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+    <div class="header-right">
+      <a class="wa-btn" href="https://wa.me/6288238781351" target="_blank"><i class="fab fa-whatsapp"></i> Chat Admin</a>
+    </div>
+  </div>
+</header>
+
+<!-- BANNER -->
+<div class="banner" id="bannerSection">
+  <div class="banner-text">
+    <h1>Aplikasi Premium<br><em>Harga Terjangkau!</em></h1>
+    <p>Netflix, Spotify, Canva, ChatGPT & 20+ produk digital lainnya</p>
+    <div class="banner-stats">
+      <div class="stat"><div class="stat-num">25+</div><div class="stat-label">Produk</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Layanan</div></div>
+      <div class="stat"><div class="stat-num"></div><div class="stat-label">Proses Cepat</div></div>
+    </div>
+  </div>
+  <div class="banner-badges">
+    <div class="badge-pill"><i class="fas fa-shield-halved"></i> 100% Aman & Terpercaya</div>
+    <div class="badge-pill"><i class="fas fa-bolt"></i> Proses Instan via WA</div>
+    <div class="badge-pill"><i class="fas fa-headset"></i> CS Responsif 24 Jam</div>
+  </div>
+</div>
+
+<!-- KATEGORI -->
+<div class="section" id="catSection">
+  <div class="cat-scroll" id="catBar"></div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="products-section" id="mainSection">
+  <div class="product-grid" id="productGrid"></div>
+</div>
+
+<!-- ORDER -->
+<div class="order-wrap" id="orderSection">
+  <div class="breadcrumb">
+    <a onclick="backToMain()"><i class="fas fa-arrow-left"></i> Kembali</a>
+    <i class="fas fa-chevron-right"></i>
+    <span id="breadProduct">Produk</span>
+  </div>
+  <div class="order-layout">
+    <div class="order-main">
+      <!-- product info -->
+      <div class="ocard">
+        <div class="order-prod-header">
+          <div class="order-prod-img" id="orderIcon"></div>
+          <div>
+            <div class="order-prod-name" id="orderName"></div>
+            <div class="order-prod-sub" id="orderSub"></div>
+          </div>
+        </div>
+      </div>
+      <!-- akun -->
+      <div class="ocard">
+        <div class="ocard-title"><i class="fas fa-user-circle"></i> <span id="labelAkun">Data Akun</span></div>
+        <div class="form-row">
+          <div class="form-label" id="labelId"><i class="fas fa-envelope"></i> Email / ID Akun</div>
+          <input class="form-input" id="userId" placeholder="Masukkan data akun...">
+          <div class="hint" id="hintId"><i class="fas fa-info-circle"></i></div>
+        </div>
+        <div id="serverRow" class="form-row" style="display:none">
+          <div class="form-label"><i class="fas fa-server"></i> Server / Zone ID</div>
+          <input class="form-input" id="serverId" placeholder="Contoh: 2412">
+        </div>
+      </div>
+      <!-- denom -->
+      <div class="ocard">
+        <div class="ocard-title"><i class="fas fa-boxes-stacked"></i> Pilih Paket</div>
+        <div class="denom-grid" id="denomGrid"></div>
+      </div>
+      <!-- payment -->
+      <div class="ocard">
+        <div class="ocard-title"><i class="fas fa-wallet"></i> Metode Pembayaran</div>
+        <div class="pay-grid" id="payGrid"></div>
+      </div>
+    </div>
+    <!-- SIDE -->
+    <div class="order-side">
+      <div class="ocard">
+        <div class="ocard-title"><i class="fas fa-receipt"></i> Ringkasan Pesanan</div>
+        <div class="sum-row"><span class="sum-label">Produk</span><span id="sumProd" style="font-weight:600">-</span></div>
+        <div class="sum-row"><span class="sum-label">Paket</span><span id="sumDenom" style="font-weight:600;font-size:.82rem;text-align:right;max-width:160px">-</span></div>
+        <div class="sum-row"><span class="sum-label">Pembayaran</span><span id="sumPay" style="font-weight:600">-</span></div>
+        <div class="sum-total"><span>Total</span><span id="sumTotal">-</span></div>
+        <button class="btn-order" onclick="kirimWA()"><i class="fab fa-whatsapp"></i> Pesan via WhatsApp</button>
+      </div>
+      <div class="ocard">
+        <div class="ocard-title"><i class="fas fa-circle-check"></i> Keamanan Transaksi</div>
+        <div class="trust-row">
+          <div class="trust-item"><i class="fas fa-shield-halved"></i> Garansi sesuai syarat & ketentuan</div>
+          <div class="trust-item"><i class="fas fa-headset"></i> CS aktif 24 jam non-stop</div>
+          <div class="trust-item"><i class="fas fa-bolt"></i> Proses cepat via WhatsApp</div>
+          <div class="trust-item"><i class="fab fa-whatsapp"></i> Konfirmasi langsung ke WA kamu</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">Calaye<span>Store</span></div>
+  <p>© 2026 Calaye Store · Solusi Digital Terpercaya · Semua harga sudah termasuk biaya layanan</p>
+</footer>
+
+<div class="toast" id="toast"><i class="fas fa-exclamation-circle"></i><span id="toastMsg"></span></div>
+
+<script>
+const ADMIN_WA = "6288238781351";
+
+// ═══════════════════════════════════════════
+//  PRODUCT DATABASE
+// ═══════════════════════════════════════════
+const products = [
+  {
+    id:'netflix', cat:'streaming', name:'Netflix Premium', sub:'Sharing & Semi Private',
+    emoji:'🎬', color:'#E50914',
+    banner:'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Detail akun akan dikirim ke nomor WA ini',
+    hot:true,
+    denoms:[
+      {label:'Sharing 1P1U – 1 Hari', price:6000},
+      {label:'Sharing 1P1U – 3 Hari', price:12000},
+      {label:'Sharing 1P1U – 7 Hari', price:22000},
+      {label:'Sharing 1P1U – 1 Bulan', price:45000, bonus:'Paling Hemat'},
+      {label:'Sharing 1P2U – 1 Bulan', price:28000},
+      {label:'Semi Private – 7 Hari', price:25000},
+      {label:'Semi Private – 1 Bulan', price:50000, bonus:'Anti Limit!'},
+    ]
+  },
+  {
+    id:'spotify', cat:'musik', name:'Spotify Premium', sub:'Individual & Family Plan',
+    emoji:'🎵', color:'#1DB954',
+    banner:'https://images.unsplash.com/photo-1614680376408-81e91ffe3db7?w=400&h=180&fit=crop',
+    labelId:'Email Spotify', hint:'Kosongkan jika ingin dibuatkan email baru',
+    denoms:[
+      {label:'Indplan NoGar – 1 Bulan', price:20000},
+      {label:'Indplan NoGar – 2 Bulan', price:25000},
+      {label:'Indplan NoGar – 3 Bulan', price:30000},
+      {label:'Indplan FullGar – 1 Bulan', price:30000, bonus:'Full Garansi'},
+      {label:'FamPlan FullGar – 1 Bulan', price:28000},
+    ]
+  },
+  {
+    id:'youtube', cat:'streaming', name:'YouTube Premium', sub:'Individual & Family Plan',
+    emoji:'▶️', color:'#FF0000',
+    banner:'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=180&fit=crop',
+    labelId:'Email Google', hint:'Sistem invite via Family Plan',
+    denoms:[
+      {label:'FamPlan – 1 Bulan', price:7000, bonus:'Murah!'},
+      {label:'IndPlan Acc Buyer – 1 Bulan', price:8000},
+      {label:'IndPlan – 1 Bulan', price:18000},
+      {label:'IndPlan – 3 Bulan NoGar', price:25000},
+      {label:'IndPlan – 3 Bulan FullGar', price:60000, bonus:'Full Garansi'},
+    ]
+  },
+  {
+    id:'canva', cat:'desain', name:'Canva Pro', sub:'Member, EDU & Lifetime',
+    emoji:'🎨', color:'#00C4CC',
+    banner:'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=180&fit=crop',
+    labelId:'Email Canva', hint:'Akun kamu akan diinvite ke tim/edu',
+    hot:true,
+    denoms:[
+      {label:'Member/EDU – 1 Hari', price:1000},
+      {label:'Member/EDU – 3 Hari', price:2000},
+      {label:'Member/EDU – 7 Hari', price:3000},
+      {label:'Member/EDU – 1 Bulan', price:6000, bonus:'Best Seller'},
+      {label:'Member/EDU – 3 Bulan', price:10000},
+      {label:'Member/EDU – 6 Bulan', price:16000},
+      {label:'Member/EDU – 1 Tahun', price:22000},
+      {label:'EduLifetime Gar 6 Bulan', price:25000},
+      {label:'EduLifetime Gar 1 Tahun', price:30000, bonus:'Lifetime!'},
+    ]
+  },
+  {
+    id:'chatgpt', cat:'ai', name:'ChatGPT Plus', sub:'Sharing & Private Plan',
+    emoji:'🤖', color:'#10A37F',
+    banner:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&h=180&fit=crop',
+    labelId:'Email Akun', hint:'OTP? Wajib janjian dulu saat login',
+    hot:true,
+    denoms:[
+      {label:'Sharing 8U Plus – 1 Hari', price:7000},
+      {label:'Sharing 8U Plus – 3 Hari', price:18000},
+      {label:'Sharing 8U Plus – 7 Hari', price:25000},
+      {label:'Sharing 8U Plus – 1 Bulan', price:45000, bonus:'Populer'},
+      {label:'Sharing 5U Plus – 1 Bulan', price:60000},
+      {label:'ChatGPT Go Shar 6U – 1 Bln', price:15000},
+      {label:'ChatGPT Plus Priv NoGar – 1 Bln', price:20000},
+      {label:'ChatGPT Go Priv – 3 Bulan', price:80000, bonus:'Full Garansi'},
+    ]
+  },
+  {
+    id:'claude', cat:'ai', name:'Claude AI Pro', sub:'Private Account',
+    emoji:'✨', color:'#CC785C',
+    banner:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Need OTP – wajib janjian saat login',
+    denoms:[
+      {label:'Private – 1 Hari', price:25000},
+      {label:'Private – 2 Hari', price:45000},
+      {label:'Private – 3 Hari', price:60000},
+      {label:'Private – 1 Bulan', price:350000, bonus:'Full Garansi'},
+    ]
+  },
+  {
+    id:'disney', cat:'streaming', name:'Disney+ Hotstar', sub:'Basic & Premium Plan',
+    emoji:'🏰', color:'#0063E5',
+    banner:'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400&h=180&fit=crop',
+    labelId:'Email Akun', hint:'OTP? Janjian dulu · SS login wajib',
+    denoms:[
+      {label:'Basic Sharing 3U – 1 Hari', price:5000},
+      {label:'Basic Sharing 3U – 3 Hari', price:10000},
+      {label:'Basic Sharing 3U – 7 Hari', price:16000},
+      {label:'Basic Sharing 3U – 1 Bulan', price:35000},
+      {label:'Premium Shar 6U – 1 Bulan', price:35000, bonus:'Best Value'},
+      {label:'Premium Shar 3U – 1 Bulan', price:60000},
+      {label:'Basic Private – 1 Bulan', price:85000},
+      {label:'Premium Private – 1 Bulan', price:125000, bonus:'Limit Screen 3'},
+    ]
+  },
+  {
+    id:'hbomax', cat:'streaming', name:'HBO Max', sub:'Standard & Ultimate',
+    emoji:'🎭', color:'#6B46C1',
+    banner:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Detail akun dikirim ke WA ini',
+    denoms:[
+      {label:'Standard Shar 8U – 1 Hari', price:4000},
+      {label:'Standard Shar 8U – 3 Hari', price:8000},
+      {label:'Standard Shar 8U – 7 Hari', price:15000},
+      {label:'Standard Shar 8U – 1 Bulan', price:20000, bonus:'Hemat'},
+      {label:'Ultimate Shar 7U – 1 Hari', price:6000},
+      {label:'Ultimate Shar 7U – 1 Bulan', price:30000},
+    ]
+  },
+  {
+    id:'prime', cat:'streaming', name:'Prime Video', sub:'Sharing & Private',
+    emoji:'📦', color:'#00A8E1',
+    banner:'https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Detail akun dikirim ke WA ini',
+    denoms:[
+      {label:'Sharing 8U – 1 Bulan', price:8000, bonus:'Paling Murah'},
+      {label:'Sharing 5U – 1 Hari', price:4000},
+      {label:'Sharing 5U – 3 Hari', price:8000},
+      {label:'Sharing 5U – 1 Bulan', price:12000},
+      {label:'Sharing 4U – 1 Bulan', price:15000},
+      {label:'Sharing 2U – 1 Bulan', price:20000},
+      {label:'Private – 1 Bulan', price:25000},
+    ]
+  },
+  {
+    id:'vidio', cat:'streaming', name:'Vidio Platinum', sub:'All Device & TV',
+    emoji:'📺', color:'#FF5A00',
+    banner:'https://images.unsplash.com/photo-1461151304267-38535e780c79?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Hanya bisa ditonton di Indonesia',
+    denoms:[
+      {label:'Sharing 2U All Device – 1 Hari', price:10000},
+      {label:'Sharing 2U All Device – 1 Bln', price:35000},
+      {label:'Private All Device – 1 Hari', price:12000},
+      {label:'Private All Device – 1 Bulan', price:55000, bonus:'Liga 1, UCL, NBA'},
+      {label:'Private Mobile – 1 Bulan', price:40000},
+      {label:'Private TV Only – 1 Bulan', price:12000},
+    ]
+  },
+  {
+    id:'wetv', cat:'streaming', name:'WeTV Premium', sub:'Sharing & Private',
+    emoji:'🎞️', color:'#FF4E7B',
+    banner:'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Sharing 8U/6U tidak boleh login TV',
+    denoms:[
+      {label:'Sharing 8U – 1 Bulan', price:10000, bonus:'Hemat'},
+      {label:'Sharing 6U – 1 Hari', price:5000},
+      {label:'Sharing 6U – 3 Hari', price:8000},
+      {label:'Sharing 6U – 1 Bulan', price:15000},
+      {label:'Sharing 3U – 1 Bulan', price:25000},
+      {label:'Private – 1 Bulan', price:40000},
+    ]
+  },
+  {
+    id:'capcut', cat:'desain', name:'CapCut Pro', sub:'Sharing & Private',
+    emoji:'✂️', color:'#000000',
+    banner:'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'IOS disarankan ambil private. Login Laptop/PC wajib private',
+    denoms:[
+      {label:'Sharing 2U – 1 Hari', price:6000},
+      {label:'Sharing 2U – 3 Hari', price:12000},
+      {label:'Sharing 2U – 1 Bulan', price:35000},
+      {label:'Private – 1 Hari', price:8000},
+      {label:'Private – 7 Hari', price:20000},
+      {label:'Private – 1 Bulan', price:55000, bonus:'Max 2 Device'},
+    ]
+  },
+  {
+    id:'picsart', cat:'desain', name:'PicsArt Premium', sub:'Sharing & Private',
+    emoji:'🖼️', color:'#FF4500',
+    banner:'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Full garansi jika patuhi SnK',
+    denoms:[
+      {label:'Sharing – 1 Bulan', price:10000},
+      {label:'Private – 7 Hari', price:5000},
+      {label:'Private – 1 Bulan', price:15000, bonus:'Full Garansi'},
+    ]
+  },
+  {
+    id:'alight', cat:'desain', name:'Alight Motion', sub:'Private 6 Bulan & 1 Tahun',
+    emoji:'🎬', color:'#7C3AED',
+    banner:'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=180&fit=crop',
+    labelId:'Email Akun (Buyer)', hint:'Acc buyer: email + password wajib FRESH',
+    denoms:[
+      {label:'Private Acc Seller – 6 Bulan', price:8000},
+      {label:'Private Acc Buyer – 1 Tahun', price:6000},
+      {label:'Private Acc Seller – 1 Tahun', price:10000, bonus:'Garansi 6 Bln'},
+    ]
+  },
+  {
+    id:'grammarly', cat:'produktif', name:'Grammarly Premium', sub:'Sharing & Private',
+    emoji:'📝', color:'#15C39A',
+    banner:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=180&fit=crop',
+    labelId:'Email Akun', hint:'23–28 hari dihitung 1 bulan',
+    denoms:[
+      {label:'Sharing 7U – 1 Bulan', price:15000},
+      {label:'Private – 1 Bulan', price:45000, bonus:'Full Garansi'},
+    ]
+  },
+  {
+    id:'perplexity', cat:'ai', name:'Perplexity Pro', sub:'Sharing 5 User',
+    emoji:'🔍', color:'#20808D',
+    banner:'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=180&fit=crop',
+    labelId:'Email Akun', hint:'OTP? Wajib janjian. Tidak menerima komplain limit',
+    denoms:[
+      {label:'Sharing 5U – 1 Hari', price:6000},
+      {label:'Sharing 5U – 3 Hari', price:15000},
+      {label:'Sharing 5U – 7 Hari', price:25000},
+      {label:'Sharing 5U – 1 Bulan', price:40000, bonus:'Full Fitur'},
+    ]
+  },
+  {
+    id:'scribd', cat:'produktif', name:'Scribd Premium', sub:'Sharing & Private',
+    emoji:'📚', color:'#1B649D',
+    banner:'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Scribd ada limit akses. Limit habis = beli ulang',
+    denoms:[
+      {label:'Sharing 3U – 1 Bulan', price:10000},
+      {label:'Sharing 3U – 2 Bulan', price:15000},
+      {label:'Sharing 3U – 3 Bulan', price:20000},
+      {label:'Private – 1 Bulan', price:20000},
+      {label:'Private – 3 Bulan', price:30000, bonus:'Hemat 33%'},
+    ]
+  },
+  {
+    id:'zoom', cat:'produktif', name:'Zoom Premium', sub:'100–1000 Participant',
+    emoji:'📹', color:'#2D8CFF',
+    banner:'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Harian HARUS dipesan sesuai tanggal meeting!',
+    denoms:[
+      {label:'100 Participant – 1 Hari', price:8000},
+      {label:'100 Participant – 3 Hari', price:16000},
+      {label:'100 Participant – 7 Hari', price:24000},
+      {label:'100 Participant – 1 Bulan', price:60000},
+      {label:'300 Participant – 1 Hari', price:35000, bonus:'30 Jam'},
+      {label:'500 Participant – 1 Hari', price:65000},
+      {label:'1000 Participant – 1 Hari', price:150000, bonus:'Webinar'},
+    ]
+  },
+  {
+    id:'appmusic', cat:'musik', name:'Apple Music', sub:'Family & Individual Plan',
+    emoji:'🍎', color:'#FC3158',
+    banner:'https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?w=400&h=180&fit=crop',
+    labelId:'Email Apple ID', hint:'FamPlan via join link · Andro only',
+    denoms:[
+      {label:'FamPlan – 1 Bulan', price:10000, bonus:'Hemat'},
+      {label:'IndPlan – 1 Bulan', price:15000},
+      {label:'FamHead (Invite 5 Email) – 1 Bln', price:25000},
+    ]
+  },
+  {
+    id:'iqiyi', cat:'streaming', name:'iQIYI Premium', sub:'Sharing & Private',
+    emoji:'🎪', color:'#00BC6C',
+    banner:'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Premium: limit 4 screen · Standar: limit 2 screen',
+    denoms:[
+      {label:'Sharing Standar – 14 Hari', price:8000},
+      {label:'Sharing Standar – 1 Bulan', price:15000},
+      {label:'Sharing Premium – 1 Bulan', price:20000, bonus:'4K'},
+      {label:'Private Standar – 1 Bulan', price:40000},
+      {label:'Private Premium – 1 Bulan', price:45000, bonus:'Full Akses'},
+    ]
+  },
+  {
+    id:'bstation', cat:'streaming', name:'Bilibili / Bstation', sub:'Sharing Premium',
+    emoji:'📱', color:'#F25D8E',
+    banner:'https://images.unsplash.com/photo-1541877944-ac82a091518a?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Tidak bisa login di TV · 1 tahun garansi 6 bulan',
+    denoms:[
+      {label:'Sharing – 1 Bulan', price:12000},
+      {label:'Sharing – 3 Bulan', price:20000},
+      {label:'Sharing – 1 Tahun', price:30000, bonus:'Hemat 50%'},
+    ]
+  },
+  {
+    id:'youku', cat:'streaming', name:'Youku Premium', sub:'Sharing 8U & 5U',
+    emoji:'🎥', color:'#FF6600',
+    banner:'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'1 tahun garansi 6 bulan',
+    denoms:[
+      {label:'Sharing 8U – 1 Bulan', price:10000},
+      {label:'Sharing 8U – 3 Bulan', price:20000},
+      {label:'Sharing 8U – 1 Tahun', price:30000, bonus:'Hemat 58%'},
+      {label:'Sharing 5U – 1 Bulan', price:15000},
+    ]
+  },
+  {
+    id:'quillbot', cat:'produktif', name:'QuillBot Premium', sub:'Sharing 8 User',
+    emoji:'🖊️', color:'#4CAF50',
+    banner:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=180&fit=crop',
+    labelId:'Email Akun', hint:'Full garansi jika patuhi SnK · sharing max 1 device',
+    denoms:[
+      {label:'Sharing 8U – 1 Bulan', price:16000, bonus:'Full Fitur'},
+    ]
+  },
+  {
+    id:'gptzero', cat:'ai', name:'GPTZero Premium', sub:'Private Account',
+    emoji:'🔮', color:'#6366F1',
+    banner:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&h=180&fit=crop',
+    labelId:'Email Akun', hint:'OTP sistem janjian (wajib standby saat login)',
+    denoms:[
+      {label:'Private – 7 Hari', price:28000, bonus:'Anti Plagiarisme'},
+    ]
+  },
+  {
+    id:'loklok', cat:'streaming', name:'LokLok Premium', sub:'Basic & Standard Plan',
+    emoji:'📲', color:'#FF4757',
+    banner:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Standard bisa login TV & nonton short',
+    denoms:[
+      {label:'Basic Sharing 3U – 1 Hari', price:4000},
+      {label:'Basic Sharing 3U – 3 Hari', price:8000},
+      {label:'Basic Sharing 3U – 1 Bulan', price:25000},
+      {label:'Basic Private – 1 Bulan', price:60000},
+      {label:'Standard Sharing 4U – 1 Bulan', price:30000, bonus:'Bisa TV!'},
+      {label:'Standard Private – 1 Bulan', price:100000},
+    ]
+  },
+  {
+    id:'melolo', cat:'musik', name:'Melolo Premium', sub:'Sharing',
+    emoji:'🎶', color:'#E91E63',
+    banner:'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=180&fit=crop',
+    labelId:'Email Google', hint:'Login menggunakan Google · sharing max 1 device',
+    denoms:[
+      {label:'Sharing – 1 Bulan', price:15000, bonus:'Full Garansi'},
+    ]
+  },
+  {
+    id:'meitu', cat:'desain', name:'Meitu VIP', sub:'Private 7 Hari',
+    emoji:'💄', color:'#E91E8C',
+    banner:'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Andro only · lock device = nogar · VIP tidak termasuk filter HD',
+    denoms:[
+      {label:'Private VIP – 7 Hari', price:12000},
+    ]
+  },
+  {
+    id:'vision', cat:'streaming', name:'Vision+ PayTV', sub:'Sharing 3U & Private',
+    emoji:'📡', color:'#0D47A1',
+    banner:'https://images.unsplash.com/photo-1461151304267-38535e780c79?w=400&h=180&fit=crop',
+    labelId:'Nomor WhatsApp', hint:'Bisa nonton Timnas, F1, MotoGP · siaran live only',
+    denoms:[
+      {label:'PayTV Sharing 3U – 1 Hari', price:4000},
+      {label:'PayTV Sharing 3U – 3 Hari', price:8000},
+      {label:'PayTV Sharing 3U – 1 Bulan', price:18000, bonus:'F1 & MotoGP'},
+      {label:'PayTV Private – 1 Hari', price:6000},
+      {label:'PayTV Private – 1 Bulan', price:25000},
+    ]
+  },
+];
+
+const categories = [
+  {id:'all', label:'Semua', icon:'fa-grid-2'},
+  {id:'streaming', label:'Streaming', icon:'fa-play-circle'},
+  {id:'musik', label:'Musik', icon:'fa-music'},
+  {id:'desain', label:'Desain & Edit', icon:'fa-palette'},
+  {id:'ai', label:'AI Tools', icon:'fa-robot'},
+  {id:'produktif', label:'Produktivitas', icon:'fa-briefcase'},
+];
+
+const payments = [
+  {id:'qris', name:'QRIS', icon:'fa-qrcode'},
+  {id:'dana', name:'DANA', icon:'fa-wallet'},
+  {id:'gopay', name:'GoPay', icon:'fa-mobile-screen'},
+];
+
+let activeCat = 'all', searchQ = '', selProd = null, selDenom = null, selPay = null;
+
+function fmt(n){return 'Rp '+n.toLocaleString('id-ID')}
+
+// ── RENDER CATEGORIES ──
+function renderCats(){
+  document.getElementById('catBar').innerHTML = categories.map(c=>`
+    <div class="cat-pill ${activeCat===c.id?'active':''}" onclick="setCat('${c.id}')">
+      <i class="fas ${c.icon}"></i> ${c.label}
+    </div>`).join('');
+}
+
+function setCat(id){activeCat=id;renderCats();renderProducts()}
+
+// ── SEARCH ──
+function handleSearch(){searchQ=document.getElementById('searchInput').value.toLowerCase();renderProducts()}
+
+// ── RENDER PRODUCTS ──
+function renderProducts(){
+  const filtered = products.filter(p=>{
+    const catOk = activeCat==='all'||p.cat===activeCat;
+    const searchOk = !searchQ || p.name.toLowerCase().includes(searchQ)||p.sub.toLowerCase().includes(searchQ);
+    return catOk && searchOk;
+  });
+  const grid = document.getElementById('productGrid');
+  if(!filtered.length){
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><i class="fas fa-box-open"></i>Produk tidak ditemukan</div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p=>`
+    <div class="prod-card" onclick="openOrder('${p.id}')">
+      <div class="prod-banner">
+        <img src="${p.banner}" alt="${p.name}" onerror="this.parentElement.innerHTML='<div class=prod-banner-fallback>${p.emoji}</div>'">
+        <span class="prod-badge ${p.hot?'badge-hot':'badge-instan'}">${p.hot?'🔥 Hot':'⚡ Instan'}</span>
+      </div>
+      <div class="prod-body">
+        <div class="prod-icon-row">
+          <div class="prod-icon" style="background:${p.color}22"><span style="font-size:1.2rem">${p.emoji}</span></div>
+          <div>
+            <div class="prod-name">${p.name}</div>
+          </div>
+        </div>
+        <div class="prod-desc">${p.sub}</div>
+        <div class="prod-price-row">
+          <div class="prod-price">Mulai ${fmt(Math.min(...p.denoms.map(d=>d.price)))}</div>
+          <div class="prod-cta">Beli</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── OPEN ORDER ──
+function openOrder(id){
+  selProd = products.find(p=>p.id===id);
+  selDenom=null; selPay=null;
+  // fill header
+  document.getElementById('breadProduct').innerText = selProd.name;
+  document.getElementById('orderName').innerText = selProd.name;
+  document.getElementById('orderSub').innerText = selProd.sub;
+  document.getElementById('orderIcon').innerHTML = `<span style="font-size:2rem">${selProd.emoji}</span>`;
+  document.getElementById('orderIcon').style.background = selProd.color+'22';
+  document.getElementById('labelId').innerHTML = `<i class="fas fa-user"></i> ${selProd.labelId}`;
+  document.getElementById('hintId').innerHTML = `<i class="fas fa-info-circle"></i> ${selProd.hint}`;
+  document.getElementById('userId').value='';
+  document.getElementById('serverId').value='';
+  document.getElementById('serverRow').style.display='none';
+  // render denoms
+  document.getElementById('denomGrid').innerHTML = selProd.denoms.map((d,i)=>`
+    <div class="denom-item" id="di${i}" onclick="pickDenom(${i})">
+      <div class="di-amount">${d.label}</div>
+      <div class="di-price">${fmt(d.price)}</div>
+      ${d.bonus?`<div class="di-bonus">${d.bonus}</div>`:''}
+    </div>`).join('');
+  // render payment
+  document.getElementById('payGrid').innerHTML = payments.map(p=>`
+    <div class="pay-item" id="pi${p.id}" onclick="pickPay('${p.id}')">
+      <div class="pay-icon"><i class="fas ${p.icon}"></i></div>
+      <div class="pay-name">${p.name}</div>
+    </div>`).join('');
+  updateSummary();
+  // switch view
+  document.getElementById('bannerSection').style.display='none';
+  document.getElementById('catSection').style.display='none';
+  document.getElementById('mainSection').style.display='none';
+  document.getElementById('orderSection').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function backToMain(){
+  document.getElementById('orderSection').classList.remove('active');
+  document.getElementById('bannerSection').style.display='';
+  document.getElementById('catSection').style.display='';
+  document.getElementById('mainSection').style.display='';
+}
+
+function pickDenom(i){
+  selDenom=selProd.denoms[i];
+  document.querySelectorAll('.denom-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('di'+i).classList.add('selected');
+  updateSummary();
+}
+
+function pickPay(id){
+  selPay=payments.find(p=>p.id===id);
+  document.querySelectorAll('.pay-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('pi'+id).classList.add('selected');
+  updateSummary();
+}
+
+function updateSummary(){
+  document.getElementById('sumProd').innerText = selProd?selProd.name:'-';
+  document.getElementById('sumDenom').innerText = selDenom?selDenom.label:'-';
+  document.getElementById('sumPay').innerText = selPay?selPay.name:'-';
+  document.getElementById('sumTotal').innerText = selDenom?fmt(selDenom.price):'-';
+}
+
+function kirimWA(){
+  const uid = document.getElementById('userId').value.trim();
+  if(!uid){showToast('Harap isi '+selProd.labelId+'!',true);return}
+  if(!selDenom){showToast('Pilih paket terlebih dahulu!',true);return}
+  if(!selPay){showToast('Pilih metode pembayaran!',true);return}
+  const msg = `Halo Calaye Store! 👋\nSaya ingin order:\n\n` +
+    `📌 *Produk:* ${selProd.name}\n` +
+    `🔑 *${selProd.labelId}:* ${uid}\n` +
+    `💎 *Paket:* ${selDenom.label}\n` +
+    `💳 *Bayar via:* ${selPay.name}\n\n` +
+    `💰 *Total:* ${fmt(selDenom.price)}\n\n` +
+    `Mohon segera diproses ya kak, terima kasih! 🙏`;
+  window.open(`https://api.whatsapp.com/send?phone=${ADMIN_WA}&text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function showToast(msg,err=false){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').innerText=msg;
+  t.className='toast'+(err?' error':'')+' show';
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// init
+renderCats();
+renderProducts();
+</script>
+</body>
+</html>
+HTMLEOF
+echo "Done"
