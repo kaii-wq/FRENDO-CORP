@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEFA Command Center — SMK Negeri 3 Yogyakarta (Kelas X TE 2)</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Firebase JS SDK v10 Compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+  <style>
+    body {
+      background-color: #0B0F17;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0F17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    input[type="number"].no-spinner::-webkit-inner-spin-button,
+    input[type="number"].no-spinner::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"].no-spinner {
+      -moz-appearance: textfield;
+    }
+
+    #print-report-sheet {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        font-family: 'Plus Jakarta Sans', Arial, sans-serif !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      #login-overlay,
+      #app-shell,
+      #settings-modal,
+      #toast-container {
+        display: none !important;
+      }
+      #print-report-sheet {
+        display: block !important;
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        width: 100%;
+      }
+      .print-box {
+        border: 1px solid #000000 !important;
+      }
+      .print-table th,
+      .print-table td {
+        border: 1px solid #000000 !important;
+        padding: 4px 6px !important;
+        color: #000000 !important;
+      }
+      .print-table th {
+        background-color: #F8FAFC !important;
+        font-weight: 700 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0B0F17] text-slate-200 antialiased selection:bg-emerald-500/20 selection:text-emerald-200">
+
+  <!-- FIREBASE CONFIGURATION -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAz5XgzNnll5ON_C7sTIZT9iRuzHL_63w",
+      authDomain: "tefa-aa841.firebaseapp.com",
+      databaseURL: "https://tefa-aa841-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tefa-aa841",
+      storageBucket: "tefa-aa841.firebasestorage.app",
+      messagingSenderId: "645319588053",
+      appId: "1:645319588053:web:0e237892078ad3e9380a5c",
+      measurementId: "G-DMTB0V43J9"
+    };
+  </script>
+
+  <!-- 1. LAYAR KUNCI LOGIN PIN EKSKLUSIF -->
+  <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0B0F17]/95 backdrop-blur-md p-4">
+    <div class="w-full max-w-md rounded-2xl bg-[#111622] border border-slate-800/80 shadow-xl overflow-hidden">
+      <div class="p-6 sm:p-7 border-b border-slate-800/60">
+        <div class="flex items-center justify-between mb-4">
+          <span class="inline-flex items-center gap-1.5 text-xs font-mono-num font-medium text-emerald-400">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            TEFA ACCESS
+          </span>
+          <span id="login-db-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-num text-amber-400 bg-amber-500/10">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            LocalStorage Mode
+          </span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-white">
+          TEFA Command Center
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">
+          SMK Negeri 3 Yogyakarta • Kelas X TE 2 (Ruang 84)
+        </p>
+      </div>
+
+      <form id="pin-login-form" class="p-6 sm:p-7 space-y-5">
+        <div>
+          <label for="pin-input" class="block text-xs font-medium text-slate-400 mb-2">
+            Masukkan PIN Manajemen Inti
+          </label>
+          <input
+            id="pin-input"
+            type="password"
+            inputmode="numeric"
+            maxlength="4"
+            autocomplete="off"
+            placeholder="••••"
+            class="w-full text-center text-2xl tracking-[0.5em] font-mono-num font-semibold py-3 px-4 rounded-xl bg-[#0B0F17] border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/70 transition"
+            required
+          />
+          <p id="pin-error" class="hidden mt-2 text-xs text-red-400 flex items-center gap-1.5">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+            <span>PIN tidak valid. Gunakan PIN akun manajemen inti yang terdaftar.</span>
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <i data-lucide="lock-open" class="w-4 h-4"></i>
+          Masuk Ruang Kendali
+        </button>
+
+        <div class="pt-4 border-t border-slate-800/60 space-y-2">
+          <p class="text-[11px] font-medium text-slate-500">
+            Akun Manajemen Inti (Presensi 1–3):
+          </p>
+          <div class="space-y-1.5 text-xs">
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#0B0F17]/70">
+              <span class="text-slate-200 font-medium">Nico <span class="text-slate-500 font-normal">• Manajer Produksi (#1)</span></span>
+              <span class="font-mono-num text-emerald-400 text-[11px]">1001</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#0B0F17]/70">
+              <span class="text-slate-200 font-medium">Rayhan <span class="text-slate-500 font-normal">• Admin Proyek (#2)</span></span>
+              <span class="font-mono-num text-emerald-400 text-[11px]">1002</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-[#0B0F17]/70">
+              <span class="text-slate-200 font-medium">Ais <span class="text-slate-500 font-normal">• Bendahara 1 (#3)</span></span>
+              <span class="font-mono-num text-emerald-400 text-[11px]">1003</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. APLIKASI UTAMA COMMAND CENTER -->
+  <div id="app-shell" class="min-h-screen flex flex-col">
+    <!-- TOP ACTION BAR -->
+    <header class="sticky top-0 z-30 bg-[#0B0F17]/90 backdrop-blur-md border-b border-slate-800/70">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-base font-bold tracking-tight text-white">
+                TEFA Command Center
+              </h1>
+              <span id="db-status-badge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono-num text-amber-400 bg-amber-500/10">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                LocalStorage Mode
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">
+              SMK Negeri 3 Yogyakarta • Perakitan Songsong Helm Latih (PT YPTI)
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onclick="openSettingsModal()"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-[#111622] hover:bg-slate-800/80 text-slate-300 border border-slate-800 transition cursor-pointer"
+          >
+            <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Pengaturan</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="exportDayCSV()"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-[#111622] hover:bg-slate-800/80 text-slate-300 border border-slate-800 transition cursor-pointer"
+          >
+            <i data-lucide="download" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="triggerPrintReport()"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-[#111622] hover:bg-slate-800/80 text-slate-300 border border-slate-800 transition cursor-pointer"
+          >
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span>Cetak</span>
+          </button>
+
+          <div class="h-5 w-px bg-slate-800 mx-1 hidden sm:block"></div>
+
+          <div id="active-user-pill" class="inline-flex items-center gap-2.5 pl-3 pr-1.5 py-1 rounded-xl bg-[#111622] border border-slate-800">
+            <div class="text-left leading-tight">
+              <div id="active-user-name" class="text-xs font-semibold text-white">-</div>
+              <div id="active-user-role" class="text-[10px] font-mono-num text-slate-400">-</div>
+            </div>
+            <button
+              type="button"
+              onclick="logoutSession()"
+              title="Keluar / Kunci Layar"
+              class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer"
+            >
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+      <!-- BAR JADWAL PELAKSANAAN & KONTROL SHIFT -->
+      <section class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+          <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="date-cards-container"></div>
+
+          <div class="lg:col-span-5 grid grid-cols-3 gap-3 bg-[#0B0F17] p-3 rounded-xl border border-slate-800/60">
+            <div>
+              <label for="shift-start" class="block text-[11px] font-medium text-slate-400 mb-1">
+                Waktu Mulai
+              </label>
+              <input
+                id="shift-start"
+                type="time"
+                onchange="updateDayField('jamMulai', this.value)"
+                class="w-full px-2.5 py-1.5 rounded-lg bg-[#111622] border border-slate-800 text-xs font-mono-num font-medium text-white focus:outline-none focus:border-emerald-500/60"
+              />
+            </div>
+
+            <div>
+              <label for="shift-end" class="block text-[11px] font-medium text-slate-400 mb-1">
+                Waktu Selesai
+              </label>
+              <input
+                id="shift-end"
+                type="time"
+                onchange="updateDayField('jamSelesai', this.value)"
+                class="w-full px-2.5 py-1.5 rounded-lg bg-[#111622] border border-slate-800 text-xs font-mono-num font-medium text-white focus:outline-none focus:border-emerald-500/60"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">
+                Dikemas (@5)
+              </label>
+              <div class="flex items-center gap-1">
+                <button
+                  type="button"
+                  onclick="stepPacking(-1)"
+                  class="w-7 h-7 rounded-lg bg-[#111622] hover:bg-slate-800 text-slate-300 font-mono-num flex items-center justify-center border border-slate-800 cursor-pointer"
+                >-</button>
+                <input
+                  id="packing-verified-input"
+                  type="number"
+                  min="0"
+                  onchange="setPackingVerified(this.value)"
+                  class="no-spinner w-full text-center px-1 py-1 rounded-lg bg-[#111622] border border-slate-800 text-xs font-mono-num font-semibold text-sky-400 focus:outline-none focus:border-sky-500/60"
+                />
+                <button
+                  type="button"
+                  onclick="stepPacking(1)"
+                  class="w-7 h-7 rounded-lg bg-[#111622] hover:bg-slate-800 text-slate-300 font-mono-num flex items-center justify-center border border-slate-800 cursor-pointer"
+                >+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span class="inline-flex items-center gap-1.5 text-slate-200 font-medium">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span id="info-tanggal-lengkap">-</span>
+            </span>
+            <span class="font-mono-num">Kelas: <strong id="info-kelas" class="text-slate-200 font-semibold">X TE 2</strong></span>
+            <span class="font-mono-num">Ruang: <strong id="info-ruang" class="text-slate-200 font-semibold">Ruang 84</strong></span>
+            <span class="font-mono-num">Target: <strong id="info-target-kelas" class="text-emerald-400 font-semibold">230 pcs/hari</strong></span>
+          </div>
+          <div class="text-[11px] font-mono-num text-slate-500">
+            Instruktur: <span id="info-instruktur" class="text-slate-300">-</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 KARTU KPI STATISTIK UTAMA -->
+      <section class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3.5">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Lolos QC</span>
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400/80"></i>
+          </div>
+          <div id="kpi-lolos" class="text-2xl font-bold font-mono-num text-emerald-400 mt-2">0 pcs</div>
+          <p class="text-[11px] text-slate-500 mt-1">Pemeriksaan akhir</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Reject</span>
+            <i data-lucide="x-circle" class="w-4 h-4 text-red-400/80"></i>
+          </div>
+          <div id="kpi-reject" class="text-2xl font-bold font-mono-num text-red-400 mt-2">0 unit</div>
+          <p class="text-[11px] text-slate-500 mt-1">Perlu revisi ulang</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Rasio Reject</span>
+            <i data-lucide="percent" class="w-4 h-4 text-amber-400/80"></i>
+          </div>
+          <div id="kpi-rasio-reject" class="text-2xl font-bold font-mono-num text-amber-400 mt-2">0.0%</div>
+          <p class="text-[11px] text-slate-500 mt-1">Dari total unit</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Dikemas (@5)</span>
+            <i data-lucide="package" class="w-4 h-4 text-sky-400/80"></i>
+          </div>
+          <div id="kpi-kemasan" class="text-2xl font-bold font-mono-num text-sky-400 mt-2">0 ikat</div>
+          <p id="kpi-kemasan-sub" class="text-[11px] text-slate-500 mt-1 font-mono-num">Sisa: 0 pcs (@5)</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Kehadiran</span>
+            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+          </div>
+          <div id="kpi-kehadiran" class="text-2xl font-bold font-mono-num text-white mt-2">35 / 35</div>
+          <p class="text-[11px] text-slate-500 mt-1">Presensi #1–#35</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-400">
+            <span>Target Kelas</span>
+            <i data-lucide="target" class="w-4 h-4 text-emerald-400/80"></i>
+          </div>
+          <div id="kpi-target-pct" class="text-2xl font-bold font-mono-num text-emerald-400 mt-2">0%</div>
+          <p id="kpi-target-sub" class="text-[11px] text-slate-500 mt-1 font-mono-num">0 / 230 pcs</p>
+        </div>
+      </section>
+
+      <!-- 4 TAB NAVIGASI UTAMA -->
+      <nav class="flex flex-wrap gap-2" aria-label="Navigasi Tab">
+        <button
+          id="tab-btn-1"
+          type="button"
+          onclick="switchTab(1)"
+          class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer bg-emerald-500 text-slate-950"
+        >
+          <i data-lucide="sliders" class="w-4 h-4"></i>
+          <span>Lembar Unit Produksi (#13–#35)</span>
+        </button>
+
+        <button
+          id="tab-btn-2"
+          type="button"
+          onclick="switchTab(2)"
+          class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer bg-[#111622] text-slate-400 hover:text-slate-200 border border-slate-800/80"
+        >
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          <span>Susunan Tim &amp; Presensi (#1–#35)</span>
+        </button>
+
+        <button
+          id="tab-btn-3"
+          type="button"
+          onclick="switchTab(3)"
+          class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer bg-[#111622] text-slate-400 hover:text-slate-200 border border-slate-800/80"
+        >
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Rekapitulasi 4 Hari &amp; Nilai</span>
+        </button>
+
+        <button
+          id="tab-btn-4"
+          type="button"
+          onclick="switchTab(4)"
+          class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer bg-[#111622] text-slate-400 hover:text-slate-200 border border-slate-800/80"
+        >
+          <i data-lucide="boxes" class="w-4 h-4"></i>
+          <span>Logistik, Kas &amp; 5R</span>
+        </button>
+      </nav>
+
+      <!-- TAB 1: LEMBAR UNIT PRODUKSI (PRESENSI #13-#35 / 23 STAF) -->
+      <section id="tab-panel-1" class="tab-panel">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-bold text-white">Lembar Unit Produksi — Staf Produksi (Presensi #13–#35)</h2>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Target <span class="font-mono-num text-emerald-400">10 pcs/pekerja</span> • Rumus <span class="font-mono-num text-slate-200">(Pencapaian / 15) × 100%</span> • KKM <span class="font-mono-num text-slate-200">76</span>
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input
+                  id="search-worker-input"
+                  type="text"
+                  oninput="renderWorkersTable()"
+                  placeholder="Cari nama / no. presensi..."
+                  class="pl-8 pr-3 py-1.5 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 w-52"
+                />
+              </div>
+
+              <button
+                id="filter-reject-btn"
+                type="button"
+                onclick="toggleFilterReject()"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer bg-[#0B0F17] text-slate-400 border-slate-800 hover:text-red-300"
+              >
+                <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                <span>Filter Reject</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-800/70">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-[#0B0F17] border-b border-slate-800/70 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <th class="py-3 px-3 text-center">No. Presensi</th>
+                  <th class="py-3 px-4">Nama Pekerja</th>
+                  <th class="py-3 px-3 text-center">Waktu Mulai – Selesai (Menit)</th>
+                  <th class="py-3 px-3 text-center">Lolos QC</th>
+                  <th class="py-3 px-3 text-center">Reject</th>
+                  <th class="py-3 px-3 text-center">% Produktivitas</th>
+                  <th class="py-3 px-4 text-center">Konversi Nilai</th>
+                </tr>
+              </thead>
+              <tbody id="workers-table-body" class="divide-y divide-slate-800/50 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SUSUNAN TIM & PRESENSI (#1-#35) -->
+      <section id="tab-panel-2" class="tab-panel hidden">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-bold text-white">Susunan Tim Kelas &amp; Presensi (Bagian F Buku Pegangan)</h2>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Presensi #1–#12 Manajemen &amp; Koordinator • Presensi #13–#35 Staf Unit Produksi
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick="markAllPresent()"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition cursor-pointer"
+            >
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+              <span>Tandai Hadir Semua</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+            <div class="rounded-xl bg-[#0B0F17] border border-slate-800/60 p-4">
+              <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800/60">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                  A. Manajemen &amp; Koordinator (Presensi #1–#12)
+                </h3>
+                <span class="text-[11px] font-mono-num text-slate-500">PIN 1001–1012</span>
+              </div>
+              <div id="attendance-mgmt-list" class="divide-y divide-slate-800/40"></div>
+            </div>
+
+            <div class="rounded-xl bg-[#0B0F17] border border-slate-800/60 p-4">
+              <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800/60">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-sky-400">
+                  B. Staf Unit Produksi (Presensi #13–#35)
+                </h3>
+                <span class="text-[11px] font-mono-num text-slate-500">PIN 2001–2023</span>
+              </div>
+              <div id="attendance-staff-list" class="divide-y divide-slate-800/40 max-h-[600px] overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: REKAPITULASI 4 HARI & PENILAIAN -->
+      <section id="tab-panel-3" class="tab-panel hidden space-y-5">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-white">Rekapitulasi 4 Hari Kerja (Halaman 14 Buku Pegangan)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Format kolom sesuai lembar rekapitulasi 23, 24, 26, dan 27 November 2026
+            </p>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-800/70">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-[#0B0F17] border-b border-slate-800/70 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <th class="py-3 px-4">Tanggal</th>
+                  <th class="py-3 px-3 text-center">Mulai (Pukul)</th>
+                  <th class="py-3 px-3 text-center">Selesai (Pukul)</th>
+                  <th class="py-3 px-3 text-right">Total Pencapaian (Unit)</th>
+                  <th class="py-3 px-3 text-right">Lolos QC</th>
+                  <th class="py-3 px-3 text-right">Reject</th>
+                  <th class="py-3 px-4 text-center">Paraf Manajer</th>
+                </tr>
+              </thead>
+              <tbody id="recap-4days-body" class="divide-y divide-slate-800/50 text-xs sm:text-sm font-mono-num"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-white">Rekap Konversi Nilai Staf Unit Produksi (#13–#35)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Akumulasi 4 hari kerja (Target 10 pcs/hari • KKM = 76)
+            </p>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-800/70">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-[#0B0F17] border-b border-slate-800/70 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <th class="py-3 px-3 text-center">No. Presensi</th>
+                  <th class="py-3 px-4">Nama Pekerja</th>
+                  <th class="py-3 px-3 text-right">Total Lolos</th>
+                  <th class="py-3 px-3 text-right">Total Reject</th>
+                  <th class="py-3 px-3 text-right">Rata-Rata/Hari</th>
+                  <th class="py-3 px-4 text-center">Konversi Nilai</th>
+                </tr>
+              </thead>
+              <tbody id="recap-grades-body" class="divide-y divide-slate-800/50 text-xs sm:text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: LOGISTIK, KAS & 5R -->
+      <section id="tab-panel-4" class="tab-panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          <!-- KARTU 1: STOK OPNAME -->
+          <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-5 space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[11px] font-mono-num text-emerald-400 font-medium">
+                  Gudang BLUD RPS Belakang • Presensi #4 &amp; #5 (Yuda &amp; Alba)
+                </span>
+                <h3 class="text-base font-bold text-white mt-0.5">Stok Opname Barang</h3>
+              </div>
+              <i data-lucide="warehouse" class="w-5 h-5 text-slate-500 shrink-0"></i>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3.5">
+              <div>
+                <label for="stok-ambil-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                  Bahan Diambil (Set)
+                </label>
+                <input
+                  id="stok-ambil-input"
+                  type="number"
+                  min="0"
+                  onchange="updateDayField('stokAmbil', Math.max(0, Number(this.value) || 0))"
+                  class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-white focus:outline-none focus:border-emerald-500/60"
+                />
+              </div>
+
+              <div>
+                <label for="stok-setor-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                  Barang Jadi Disetor (pcs)
+                </label>
+                <input
+                  id="stok-setor-input"
+                  type="number"
+                  min="0"
+                  onchange="updateDayField('stokSetor', Math.max(0, Number(this.value) || 0))"
+                  class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-white focus:outline-none focus:border-emerald-500/60"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="stok-catatan-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                Dokumen Pengambilan / Surat Jalan
+              </label>
+              <input
+                id="stok-catatan-input"
+                type="text"
+                onchange="updateDayField('stokCatatan', this.value)"
+                placeholder="No. surat jalan / pencocokan barang jadi & sisa..."
+                class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/60"
+              />
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#0B0F17] border border-slate-800/60 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-medium text-slate-300">Selisih Bahan vs Lolos QC</div>
+                <div class="text-[11px] font-mono-num text-slate-500">stokAmbil - totalLolos</div>
+              </div>
+              <div id="stok-selisih-display" class="text-base font-bold font-mono-num text-emerald-400">0</div>
+            </div>
+          </div>
+
+          <!-- KARTU 2: CHECKLIST HARIAN 5R -->
+          <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-5 space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[11px] font-mono-num text-amber-400 font-medium">
+                  Penanggung Jawab 5R • Presensi #11 &amp; #12 (Isa &amp; Safa)
+                </span>
+                <h3 class="text-base font-bold text-white mt-0.5">Checklist Harian Budaya Kerja 5R</h3>
+              </div>
+              <i data-lucide="sparkles" class="w-5 h-5 text-slate-500 shrink-0"></i>
+            </div>
+
+            <div class="grid grid-cols-5 gap-2" id="five-r-container"></div>
+
+            <div>
+              <label for="catatan-5r-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                Catatan Penataan &amp; Pemeliharaan Tempat Kerja
+              </label>
+              <input
+                id="catatan-5r-input"
+                type="text"
+                onchange="updateDayField('catatan5R', this.value)"
+                placeholder="Ringkas, Rapi, Resik, Rawat, Rajin..."
+                class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/60"
+              />
+            </div>
+          </div>
+
+          <!-- KARTU 3: KEUANGAN (AIS - BENDAHARA 1 / PRESENSI #3) -->
+          <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-5 space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[11px] font-mono-num text-sky-400 font-medium">
+                  Bendahara Proyek • Presensi #3 (Ais)
+                </span>
+                <h3 class="text-base font-bold text-white mt-0.5">Administrasi Keuangan Harian</h3>
+              </div>
+              <i data-lucide="wallet" class="w-5 h-5 text-slate-500 shrink-0"></i>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3.5">
+              <div>
+                <label for="kas-masuk-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                  Pemasukan Kas (Rp)
+                </label>
+                <input
+                  id="kas-masuk-input"
+                  type="number"
+                  min="0"
+                  step="500"
+                  onchange="updateDayField('kasPemasukan', Math.max(0, Number(this.value) || 0))"
+                  class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-emerald-400 focus:outline-none focus:border-emerald-500/60"
+                />
+              </div>
+
+              <div>
+                <label for="kas-keluar-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                  Pengeluaran Kas (Rp)
+                </label>
+                <input
+                  id="kas-keluar-input"
+                  type="number"
+                  min="0"
+                  step="500"
+                  onchange="updateDayField('kasPengeluaran', Math.max(0, Number(this.value) || 0))"
+                  class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-red-400 focus:outline-none focus:border-red-500/60"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="kas-ket-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                Keterangan Administrasi Keuangan
+              </label>
+              <input
+                id="kas-ket-input"
+                type="text"
+                onchange="updateDayField('kasKeterangan', this.value)"
+                placeholder="Rincian kas masuk / pengeluaran operasional..."
+                class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-sky-500/60"
+              />
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#0B0F17] border border-slate-800/60 flex items-center justify-between">
+              <span class="text-xs font-medium text-slate-300">Saldo Kas Bersih Hari Ini</span>
+              <span id="kas-saldo-display" class="text-base font-bold font-mono-num text-sky-400">Rp 0</span>
+            </div>
+          </div>
+
+          <!-- KARTU 4: DOKUMENTASI ADMINISTRATOR & LOG PELANGGARAN TAB -->
+          <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-5 space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[11px] font-mono-num text-purple-400 font-medium">
+                  Administrator Proyek • Presensi #2 (Rayhan)
+                </span>
+                <h3 class="text-base font-bold text-white mt-0.5">Video Kegiatan, Catatan &amp; Log Tab</h3>
+              </div>
+              <i data-lucide="video" class="w-5 h-5 text-slate-500 shrink-0"></i>
+            </div>
+
+            <div>
+              <label for="link-video-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                URL Google Drive Dokumentasi Video Kegiatan
+              </label>
+              <div class="flex gap-2">
+                <input
+                  id="link-video-input"
+                  type="url"
+                  onchange="updateDayField('linkVideo', this.value.trim())"
+                  placeholder="https://drive.google.com/..."
+                  class="flex-1 px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-purple-500/60"
+                />
+                <button
+                  type="button"
+                  onclick="openDriveVideo()"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 transition shrink-0 cursor-pointer"
+                >
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                  <span>Buka</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label for="catatan-admin-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+                Catatan Manajer Produksi / Berita Acara Harian
+              </label>
+              <textarea
+                id="catatan-admin-input"
+                rows="2"
+                onchange="updateDayField('catatanAdmin', this.value)"
+                placeholder="Catatan Manajer Produksi & evaluasi harian..."
+                class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/60"
+              ></textarea>
+            </div>
+
+            <div class="rounded-xl bg-[#0B0F17] border border-slate-800/60 p-3.5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                  Log Keluar Tab (Portal Lapangan)
+                </span>
+                <span id="pelanggaran-count-badge" class="text-[11px] font-mono-num text-slate-400">0 log</span>
+              </div>
+              <div id="pelanggaran-log-list" class="space-y-1.5 max-h-32 overflow-y-auto text-xs font-mono-num text-slate-300"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 3. MODAL PENGATURAN KELAS -->
+  <div id="settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md rounded-2xl bg-[#111622] border border-slate-800 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800/70 flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Identitas Kelas &amp; Target (Bagian E)</h3>
+        <button type="button" onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="settings-form" class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label for="meta-kelas-input" class="block text-xs font-medium text-slate-400 mb-1.5">Kelas</label>
+            <input
+              id="meta-kelas-input"
+              type="text"
+              required
+              class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500/60"
+            />
+          </div>
+
+          <div>
+            <label for="meta-ruang-input" class="block text-xs font-medium text-slate-400 mb-1.5">Nomor Ruang</label>
+            <input
+              id="meta-ruang-input"
+              type="text"
+              required
+              class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-sm text-white focus:outline-none focus:border-emerald-500/60"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="meta-instruktur-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+            Instruktur Ketarunaan (Pendamping)
+          </label>
+          <input
+            id="meta-instruktur-input"
+            type="text"
+            placeholder="Nama lengkap & gelar instruktur..."
+            class="w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/60"
+          />
+        </div>
+
+        <div>
+          <label for="meta-target-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+            Target Harian Kelas (pcs)
+          </label>
+          <input
+            id="meta-target-input"
+            type="number"
+            min="1"
+            required
+            class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-emerald-400 focus:outline-none focus:border-emerald-500/60"
+          />
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-800/70">
+          <button
+            type="button"
+            onclick="closeSettingsModal()"
+            class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-300 cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer"
+          >
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. DOKUMEN CETAK LAPORAN RESMI -->
+  <div id="print-report-sheet">
+    <div class="print-box p-4 mb-4">
+      <div class="flex items-start justify-between border-b-2 border-black pb-3 mb-3">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest">PEMERINTAH DAERAH DAERAH ISTIMEWA YOGYAKARTA</div>
+          <div class="text-xs font-bold uppercase tracking-widest">DINAS PENDIDIKAN, PEMUDA, DAN OLAHRAGA</div>
+          <div class="text-lg font-extrabold uppercase mt-0.5">SMK NEGERI 3 YOGYAKARTA</div>
+          <div class="text-[11px]">Implementasi Teaching Factory Dasar • Jasa Perakitan Songsong Helm Latih TNI AD Kemhan RI</div>
+        </div>
+        <div class="text-right text-[11px] font-mono-num">
+          <div>PEMESAN: PT YPTI</div>
+          <div>FASE E • KELAS X</div>
+          <div>23, 24, 26 &amp; 27 NOV 2026</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-4 gap-2 text-xs">
+        <div><strong>Tanggal Aktif:</strong> <span id="print-tanggal">-</span></div>
+        <div><strong>Kelas / Ruang:</strong> <span id="print-kelas-ruang">X TE 2 / Ruang 84</span></div>
+        <div><strong>Waktu Shift:</strong> <span id="print-jam-shift">07:30 - 15:00</span></div>
+        <div><strong>Jumlah Murid:</strong> <span>35 Murid</span></div>
+      </div>
+    </div>
+
+    <div class="print-box p-3 mb-4 text-xs">
+      <div class="font-bold uppercase mb-2">A. Ringkasan Capaian Produksi, QC, Kemasan &amp; Logistik</div>
+      <div class="grid grid-cols-4 gap-2 font-mono-num">
+        <div>Lolos QC: <strong id="print-kpi-lolos">0 pcs</strong></div>
+        <div>Reject: <strong id="print-kpi-reject">0 unit</strong></div>
+        <div>Dikemas (@5): <strong id="print-kpi-kemasan">0 ikat</strong></div>
+        <div>Kehadiran: <strong id="print-kpi-hadir">35 / 35</strong></div>
+        <div>Bahan Diambil: <strong id="print-stok-ambil">0 set</strong></div>
+        <div>Disetor: <strong id="print-stok-setor">0 pcs</strong></div>
+        <div>Kas Masuk: <strong id="print-kas-masuk">Rp 0</strong></div>
+        <div>Kas Keluar: <strong id="print-kas-keluar">Rp 0</strong></div>
+      </div>
+      <div class="mt-2 pt-2 border-t border-black/30">
+        <strong>5R Terpenuhi:</strong> <span id="print-5r-status">-</span> |
+        <strong>Catatan 5R:</strong> <span id="print-catatan-5r">-</span>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <div class="text-xs font-bold uppercase mb-1.5">B. Rekapitulasi dan Catatan (23, 24, 26, dan 27 November 2026)</div>
+      <table class="w-full text-[11px] border-collapse print-table font-mono-num">
+        <thead>
+          <tr>
+            <th class="text-left">Tanggal</th>
+            <th class="text-center">Mulai (Pukul)</th>
+            <th class="text-center">Selesai (Pukul)</th>
+            <th class="text-right">Total Pencapaian (Unit)</th>
+            <th class="text-right">Lolos QC</th>
+            <th class="text-right">Reject</th>
+            <th class="text-center">Paraf Manajer</th>
+          </tr>
+        </thead>
+        <tbody id="print-4days-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="mb-4">
+      <div class="text-xs font-bold uppercase mb-1.5">C. Lembar Unit Produksi — Staf Unit Produksi (Presensi #13–#35)</div>
+      <table class="w-full text-[10px] border-collapse print-table font-mono-num">
+        <thead>
+          <tr>
+            <th class="text-center w-12">No. Presensi</th>
+            <th class="text-left">Nama Pekerja</th>
+            <th class="text-center">Waktu Mulai – Selesai</th>
+            <th class="text-center">Absen</th>
+            <th class="text-right">Lolos QC</th>
+            <th class="text-right">Reject</th>
+            <th class="text-right">% Prod (/15)</th>
+            <th class="text-center">Konversi Nilai</th>
+          </tr>
+        </thead>
+        <tbody id="print-workers-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="print-box p-3 mb-6 text-xs">
+      <div class="font-bold uppercase mb-1">D. Catatan Manajer Produksi</div>
+      <p id="print-catatan-admin" class="whitespace-pre-line text-black">-</p>
+    </div>
+
+    <div class="grid grid-cols-4 gap-4 text-center text-xs pt-2">
+      <div>
+        <div class="mb-14">Manajer Produksi (#1),</div>
+        <div class="font-bold underline">Nico</div>
+        <div class="text-[10px]">Ketua Kelas • X TE 2</div>
+      </div>
+
+      <div>
+        <div class="mb-14">Administrator Proyek (#2),</div>
+        <div class="font-bold underline">Rayhan</div>
+        <div class="text-[10px]">Sekretaris Kelas • X TE 2</div>
+      </div>
+
+      <div>
+        <div class="mb-14">Bendahara Proyek (#3),</div>
+        <div class="font-bold underline">Ais</div>
+        <div class="text-[10px]">Bendahara Kelas • X TE 2</div>
+      </div>
+
+      <div>
+        <div class="mb-14">Instruktur Pengendali Kegiatan,</div>
+        <div id="print-ttd-instruktur" class="font-bold underline">( __________________ )</div>
+        <div class="text-[10px]">Pendamping TEFA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 6. JAVASCRIPT LOGIC -->
+  <script>
+    const ROOT_REF_PATH = 'tefa_songsong';
+    const LOCAL_STORAGE_KEY = 'tefa_songsong_v1_data';
+    const SESSION_AUTH_KEY = 'tefa_admin_session_v1';
+
+    const SCHEDULE_DAYS = [
+      { id: '2026-11-23', shortLabel: '23 Nov 2026', dayName: 'Senin', fullLabel: '23 November 2026' },
+      { id: '2026-11-24', shortLabel: '24 Nov 2026', dayName: 'Selasa', fullLabel: '24 November 2026' },
+      { id: '2026-11-26', shortLabel: '26 Nov 2026', dayName: 'Kamis', fullLabel: '26 November 2026' },
+      { id: '2026-11-27', shortLabel: '27 Nov 2026', dayName: 'Jumat', fullLabel: '27 November 2026' },
+    ];
+
+    const AUTH_ACCOUNTS = {
+      '1001': { name: 'Nico', role: 'Manajer Produksi (#1)', pin: '1001' },
+      '1002': { name: 'Rayhan', role: 'Administrator Proyek (#2)', pin: '1002' },
+      '1003': { name: 'Ais', role: 'Bendahara Proyek (#3)', pin: '1003' },
+    };
+
+    // Presensi #1-#12 sesuai Bagian D & F Buku Pegangan
+    const MANAGEMENT_PERSONNEL = [
+      { presensi: 1, pin: '1001', name: 'Nico', role: 'Manajer Produksi (Ketua Kelas)' },
+      { presensi: 2, pin: '1002', name: 'Rayhan', role: 'Administrator Proyek (Sekretaris)' },
+      { presensi: 3, pin: '1003', name: 'Ais', role: 'Bendahara Proyek (Bendahara)' },
+      { presensi: 4, pin: '1004', name: 'Yuda', role: 'Stok Opname Barang' },
+      { presensi: 5, pin: '1005', name: 'Alba', role: 'Stok Opname Barang' },
+      { presensi: 6, pin: '1006', name: 'Kifah', role: 'Kepala Unit Produksi' },
+      { presensi: 7, pin: '1007', name: 'Thalita', role: 'Quality Control' },
+      { presensi: 8, pin: '1008', name: 'Alpan', role: 'Quality Control' },
+      { presensi: 9, pin: '1009', name: 'Putra', role: 'Pengemasan dan Pengiriman' },
+      { presensi: 10, pin: '1010', name: 'Hidan', role: 'Pengemasan dan Pengiriman' },
+      { presensi: 11, pin: '1011', name: 'Isa', role: 'Penanggung Jawab 5R' },
+      { presensi: 12, pin: '1012', name: 'Safa', role: 'Penanggung Jawab 5R' },
+    ];
+
+    // Staf Unit Produksi (Presensi #13-#35 -> 23 Murid)
+    const PRODUCTION_WORKERS = [
+      { index: 0, presensi: 13, name: 'Rhino', pin: '2001' },
+      { index: 1, presensi: 14, name: 'Redi', pin: '2002' },
+      { index: 2, presensi: 15, name: 'Rafa', pin: '2003' },
+      { index: 3, presensi: 16, name: 'Aqim', pin: '2004' },
+      { index: 4, presensi: 17, name: 'Raihan', pin: '2005' },
+      { index: 5, presensi: 18, name: 'Fajar', pin: '2006' },
+      { index: 6, presensi: 19, name: 'Embun', pin: '2007' },
+      { index: 7, presensi: 20, name: 'Nazwa', pin: '2008' },
+      { index: 8, presensi: 21, name: 'Dea', pin: '2009' },
+      { index: 9, presensi: 22, name: 'Alvi', pin: '2010' },
+      { index: 10, presensi: 23, name: 'Ziva', pin: '2011' },
+      { index: 11, presensi: 24, name: 'Cyrilla', pin: '2012' },
+      { index: 12, presensi: 25, name: 'Neysa', pin: '2013' },
+      { index: 13, presensi: 26, name: 'Akmal', pin: '2014' },
+      { index: 14, presensi: 27, name: 'Milo', pin: '2015' },
+      { index: 15, presensi: 28, name: 'Tegar', pin: '2016' },
+      { index: 16, presensi: 29, name: 'Vika', pin: '2017' },
+      { index: 17, presensi: 30, name: 'Aul', pin: '2018' },
+      { index: 18, presensi: 31, name: 'Ilham Daniswara', pin: '2019' },
+      { index: 19, presensi: 32, name: 'Ilham Bayu', pin: '2020' },
+      { index: 20, presensi: 33, name: 'Damar', pin: '2021' },
+      { index: 21, presensi: 34, name: 'Sakti', pin: '2022' },
+      { index: 22, presensi: 35, name: 'Hafidz', pin: '2023' },
+    ];
+
+    const FIVE_R_ITEMS = ['Ringkas', 'Rapi', 'Resik', 'Rawat', 'Rajin'];
+
+    let isFirebaseConnected = false;
+    let dbRef = null;
+    let activeDateId = SCHEDULE_DAYS[0].id;
+    let activeTab = 1;
+    let filterRejectOnly = false;
+    let currentUser = null;
+
+    function createDefaultDayData() {
+      const attendance = {};
+      MANAGEMENT_PERSONNEL.forEach((p) => (attendance[p.pin] = 'Hadir'));
+      PRODUCTION_WORKERS.forEach((w) => (attendance[w.pin] = 'Hadir'));
+
+      const workers = {};
+      PRODUCTION_WORKERS.forEach((w) => {
+        workers[String(w.index)] = {
+          lolos: 0,
+          reject: 0,
+          waktuMulai: '07:30',
+          waktuSelesai: '15:00',
+          durasiMenit: 450,
+        };
+      });
+
+      return {
+        jamMulai: '07:30',
+        jamSelesai: '15:00',
+        stokAmbil: 0,
+        stokSetor: 0,
+        stokCatatan: '',
+        packingVerified: 0,
+        fiveR: [false, false, false, false, false],
+        catatan5R: '',
+        kasPemasukan: 0,
+        kasPengeluaran: 0,
+        kasKeterangan: '',
+        linkVideo: '',
+        catatanAdmin: '',
+        logPelanggaranTab: [],
+        attendance,
+        workers,
+      };
+    }
+
+    function createDefaultDatabase() {
+      const days = {};
+      SCHEDULE_DAYS.forEach((d) => {
+        days[d.id] = createDefaultDayData();
+      });
+      return {
+        meta: {
+          kelas: 'X TE 2',
+          ruang: 'Ruang 84',
+          instruktur: '',
+          targetHarianKelas: 230,
+        },
+        days,
+      };
+    }
+
+    function computeMinutesBetween(startStr, endStr) {
+      if (!startStr || !endStr || !startStr.includes(':') || !endStr.includes(':')) return 0;
+      const [sh, sm] = startStr.split(':').map(Number);
+      const [eh, em] = endStr.split(':').map(Number);
+      const diff = (eh * 60 + em) - (sh * 60 + sm);
+      return diff > 0 ? diff : 0;
+    }
+
+    function normalizeDatabase(raw) {
+      const base = createDefaultDatabase();
+      if (!raw || typeof raw !== 'object') return base;
+
+      base.meta = {
+        kelas: raw.meta?.kelas ?? 'X TE 2',
+        ruang: raw.meta?.ruang ?? 'Ruang 84',
+        instruktur: raw.meta?.instruktur ?? '',
+        targetHarianKelas: Number(raw.meta?.targetHarianKelas) > 0 ? Number(raw.meta.targetHarianKelas) : 230,
+      };
+
+      SCHEDULE_DAYS.forEach((d) => {
+        const dayRaw = raw.days?.[d.id] || {};
+        const dayDef = createDefaultDayData();
+        const jamMulai = dayRaw.jamMulai || '07:30';
+        const jamSelesai = dayRaw.jamSelesai || '15:00';
+        const defaultDur = computeMinutesBetween(jamMulai, jamSelesai);
+
+        const fiveRArr = Array.isArray(dayRaw.fiveR)
+          ? [0, 1, 2, 3, 4].map((idx) => Boolean(dayRaw.fiveR[idx]))
+          : dayDef.fiveR;
+
+        const attendance = { ...dayDef.attendance };
+        if (dayRaw.attendance && typeof dayRaw.attendance === 'object') {
+          Object.keys(attendance).forEach((pin) => {
+            if (dayRaw.attendance[pin]) attendance[pin] = dayRaw.attendance[pin];
+          });
+        }
+
+        const workers = { ...dayDef.workers };
+        if (dayRaw.workers && typeof dayRaw.workers === 'object') {
+          PRODUCTION_WORKERS.forEach((w) => {
+            const k = String(w.index);
+            const wRaw = dayRaw.workers[k] || dayRaw.workers[w.index] || {};
+            const wMulai = wRaw.waktuMulai || jamMulai;
+            const wSelesai = wRaw.waktuSelesai || jamSelesai;
+            const dur =
+              wRaw.durasiMenit !== undefined && wRaw.durasiMenit !== null
+                ? Math.max(0, Number(wRaw.durasiMenit) || 0)
+                : computeMinutesBetween(wMulai, wSelesai) || defaultDur;
+
+            workers[k] = {
+              lolos: Math.max(0, Number(wRaw.lolos) || 0),
+              reject: Math.max(0, Number(wRaw.reject) || 0),
+              waktuMulai: wMulai,
+              waktuSelesai: wSelesai,
+              durasiMenit: dur,
+            };
+          });
+        }
+
+        const logs = Array.isArray(dayRaw.logPelanggaranTab)
+          ? dayRaw.logPelanggaranTab
+          : dayRaw.logPelanggaranTab && typeof dayRaw.logPelanggaranTab === 'object'
+          ? Object.values(dayRaw.logPelanggaranTab)
+          : [];
+
+        base.days[d.id] = {
+          jamMulai,
+          jamSelesai,
+          stokAmbil: Math.max(0, Number(dayRaw.stokAmbil) || 0),
+          stokSetor: Math.max(0, Number(dayRaw.stokSetor) || 0),
+          stokCatatan: dayRaw.stokCatatan || '',
+          packingVerified: Math.max(0, Number(dayRaw.packingVerified) || 0),
+          fiveR: fiveRArr,
+          catatan5R: dayRaw.catatan5R || '',
+          kasPemasukan: Math.max(0, Number(dayRaw.kasPemasukan) || 0),
+          kasPengeluaran: Math.max(0, Number(dayRaw.kasPengeluaran) || 0),
+          kasKeterangan: dayRaw.kasKeterangan || '',
+          linkVideo: dayRaw.linkVideo || '',
+          catatanAdmin: dayRaw.catatanAdmin || '',
+          logPelanggaranTab: logs,
+          attendance,
+          workers,
+        };
+      });
+
+      return base;
+    }
+
+    let dbState = normalizeDatabase(
+      (() => {
+        try {
+          const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+          return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+          return null;
+        }
+      })()
+    );
+
+    function isPlaceholderConfig(cfg) {
+      if (!cfg || !cfg.apiKey || !cfg.databaseURL) return true;
+      return (
+        cfg.apiKey.includes('YOUR_') ||
+        cfg.databaseURL.includes('YOUR_') ||
+        cfg.projectId?.includes('YOUR_')
+      );
+    }
+
+    function updateConnectionBadges() {
+      const badgeText = isFirebaseConnected ? 'Firebase Live' : 'LocalStorage Mode';
+      const htmlContent = isFirebaseConnected
+        ? `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${badgeText}</span>`
+        : `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>${badgeText}</span>`;
+
+      const classes = isFirebaseConnected
+        ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-num text-emerald-400 bg-emerald-500/10'
+        : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-num text-amber-400 bg-amber-500/10';
+
+      const topBadge = document.getElementById('db-status-badge');
+      if (topBadge) {
+        topBadge.className = classes;
+        topBadge.innerHTML = htmlContent;
+      }
+
+      const loginBadge = document.getElementById('login-db-badge');
+      if (loginBadge) {
+        loginBadge.className = classes;
+        loginBadge.innerHTML = htmlContent;
+      }
+    }
+
+    function initFirebaseOrFallback() {
+      if (!isPlaceholderConfig(firebaseConfig) && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          const rtdb = firebase.database();
+          dbRef = rtdb.ref(ROOT_REF_PATH);
+          isFirebaseConnected = true;
+          updateConnectionBadges();
+
+          dbRef.on(
+            'value',
+            (snapshot) => {
+              const val = snapshot.val();
+              if (val) {
+                dbState = normalizeDatabase(val);
+                try {
+                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
+                } catch (_) {}
+              } else {
+                dbRef.set(dbState);
+              }
+              renderAll();
+            },
+            () => {
+              isFirebaseConnected = false;
+              updateConnectionBadges();
+              renderAll();
+            }
+          );
+          return;
+        } catch (_) {}
+      }
+
+      isFirebaseConnected = false;
+      updateConnectionBadges();
+      renderAll();
+    }
+
+    function persistDatabase(toastMessage = null) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
+      } catch (_) {}
+
+      if (isFirebaseConnected && dbRef) {
+        dbRef.set(dbState).catch(() => {});
+      }
+
+      if (toastMessage) showToast(toastMessage);
+      renderAll();
+    }
+
+    function restoreSession() {
+      try {
+        const rawSession = sessionStorage.getItem(SESSION_AUTH_KEY);
+        if (rawSession) {
+          const parsed = JSON.parse(rawSession);
+          if (parsed && AUTH_ACCOUNTS[parsed.pin]) {
+            currentUser = AUTH_ACCOUNTS[parsed.pin];
+            unlockScreen();
+            return;
+          }
+        }
+      } catch (_) {}
+      lockScreen();
+    }
+
+    function unlockScreen() {
+      const overlay = document.getElementById('login-overlay');
+      if (overlay) overlay.classList.add('hidden');
+      if (currentUser) {
+        document.getElementById('active-user-name').textContent = currentUser.name;
+        document.getElementById('active-user-role').textContent = `${currentUser.role} • ${currentUser.pin}`;
+      }
+      renderAll();
+    }
+
+    function lockScreen() {
+      const overlay = document.getElementById('login-overlay');
+      if (overlay) overlay.classList.remove('hidden');
+      const pinInput = document.getElementById('pin-input');
+      if (pinInput) {
+        pinInput.value = '';
+        setTimeout(() => pinInput.focus(), 100);
+      }
+    }
+
+    function logoutSession() {
+      sessionStorage.removeItem(SESSION_AUTH_KEY);
+      currentUser = null;
+      lockScreen();
+      showToast('Sesi dikunci.');
+    }
+
+    document.getElementById('pin-login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pinVal = document.getElementById('pin-input').value.trim();
+      const errorEl = document.getElementById('pin-error');
+      if (AUTH_ACCOUNTS[pinVal]) {
+        currentUser = AUTH_ACCOUNTS[pinVal];
+        sessionStorage.setItem(SESSION_AUTH_KEY, JSON.stringify(currentUser));
+        errorEl.classList.add('hidden');
+        unlockScreen();
+        showToast(`Selamat datang, ${currentUser.name}`);
+      } else {
+        errorEl.classList.remove('hidden');
+      }
+    });
+
+    // Aturan Konversi Nilai (Bagian D.3a Buku Pegangan, KKM = 76)
+    function calculateWorkerGrade(lolos, reject) {
+      const l = Number(lolos) || 0;
+      const r = Number(reject) || 0;
+      if (l === 0 && r === 0) return { label: '-', badgeClass: 'bg-slate-800/70 text-slate-400' };
+      if (l < 10) return { label: 'Tidak KKM', badgeClass: 'bg-red-500/10 text-red-400' };
+      if (l > 10 && r === 0) return { label: '100', badgeClass: 'bg-emerald-500/10 text-emerald-400' };
+      if (l > 10 && r > 0) return { label: '96', badgeClass: 'bg-sky-500/10 text-sky-400' };
+      if (l === 10 && r === 0) return { label: '86', badgeClass: 'bg-teal-500/10 text-teal-300' };
+      return { label: '76', badgeClass: 'bg-amber-500/10 text-amber-300' };
+    }
+
+    function getDayMetrics(dayId) {
+      const day = dbState.days[dayId] || createDefaultDayData();
+      let totalLolos = 0;
+      let totalReject = 0;
+
+      PRODUCTION_WORKERS.forEach((w) => {
+        const wData = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+        totalLolos += Number(wData.lolos) || 0;
+        totalReject += Number(wData.reject) || 0;
+      });
+
+      const totalUnit = totalLolos + totalReject;
+      const rasioReject = totalUnit > 0 ? ((totalReject / totalUnit) * 100).toFixed(1) : '0.0';
+      const packingVerified = Number(day.packingVerified) || 0;
+      const sisaPacking = Math.max(0, totalLolos - packingVerified * 5);
+
+      const allPins = [
+        ...MANAGEMENT_PERSONNEL.map((p) => p.pin),
+        ...PRODUCTION_WORKERS.map((w) => w.pin),
+      ];
+      let hadirCount = 0;
+      allPins.forEach((pin) => {
+        if ((day.attendance?.[pin] || 'Hadir') === 'Hadir') hadirCount += 1;
+      });
+
+      const targetKelas = Number(dbState.meta.targetHarianKelas) || 230;
+      const targetPct = targetKelas > 0 ? Math.round((totalLolos / targetKelas) * 100) : 0;
+
+      return {
+        totalLolos,
+        totalReject,
+        totalUnit,
+        rasioReject,
+        packingVerified,
+        sisaPacking,
+        hadirCount,
+        totalPersonel: allPins.length,
+        targetKelas,
+        targetPct,
+      };
+    }
+
+    function renderAll() {
+      renderScheduleAndShift();
+      renderKPIs();
+      renderWorkersTable();
+      renderAttendanceLists();
+      renderRecapTab();
+      renderLogisticsAndDocs();
+      renderPrintSheet();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderScheduleAndShift() {
+      const container = document.getElementById('date-cards-container');
+      container.innerHTML = SCHEDULE_DAYS.map((d) => {
+        const isActive = d.id === activeDateId;
+        const m = getDayMetrics(d.id);
+        return `
+          <button
+            type="button"
+            onclick="selectDate('${d.id}')"
+            class="text-left p-3 rounded-xl border transition cursor-pointer ${
+              isActive
+                ? 'bg-emerald-500/10 border-emerald-500/50'
+                : 'bg-[#0B0F17] border-slate-800/70 hover:border-slate-700'
+            }"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-semibold ${isActive ? 'text-emerald-400' : 'text-slate-400'}">
+                ${d.dayName}
+              </span>
+              <span class="text-[10px] font-mono-num ${isActive ? 'text-emerald-300' : 'text-slate-500'}">
+                ${m.totalLolos} pcs
+              </span>
+            </div>
+            <div class="text-xs sm:text-sm font-bold font-mono-num text-white mt-1">${d.shortLabel}</div>
+          </button>
+        `;
+      }).join('');
+
+      const day = dbState.days[activeDateId];
+      document.getElementById('shift-start').value = day.jamMulai || '07:30';
+      document.getElementById('shift-end').value = day.jamSelesai || '15:00';
+      document.getElementById('packing-verified-input').value = day.packingVerified || 0;
+
+      const activeDayObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
+      document.getElementById('info-tanggal-lengkap').textContent = `${activeDayObj.dayName}, ${activeDayObj.fullLabel}`;
+      document.getElementById('info-kelas').textContent = dbState.meta.kelas;
+      document.getElementById('info-ruang').textContent = dbState.meta.ruang;
+      document.getElementById('info-target-kelas').textContent = `${dbState.meta.targetHarianKelas} pcs/hari`;
+      document.getElementById('info-instruktur').textContent = dbState.meta.instruktur || 'Belum diatur';
+    }
+
+    function renderKPIs() {
+      const m = getDayMetrics(activeDateId);
+      document.getElementById('kpi-lolos').textContent = `${m.totalLolos} pcs`;
+      document.getElementById('kpi-reject').textContent = `${m.totalReject} unit`;
+      document.getElementById('kpi-rasio-reject').textContent = `${m.rasioReject}%`;
+      document.getElementById('kpi-kemasan').textContent = `${m.packingVerified} ikat`;
+      document.getElementById('kpi-kemasan-sub').textContent = `Sisa: ${m.sisaPacking} pcs (@5)`;
+      document.getElementById('kpi-kehadiran').textContent = `${m.hadirCount} / ${m.totalPersonel}`;
+      document.getElementById('kpi-target-pct').textContent = `${m.targetPct}%`;
+      document.getElementById('kpi-target-sub').textContent = `${m.totalLolos} / ${m.targetKelas} pcs`;
+    }
+
+    function renderWorkersTable() {
+      const tbody = document.getElementById('workers-table-body');
+      const day = dbState.days[activeDateId];
+      const query = (document.getElementById('search-worker-input')?.value || '').trim().toLowerCase();
+
+      const filtered = PRODUCTION_WORKERS.filter((w) => {
+        const wData = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+        const matchesQuery =
+          !query ||
+          w.name.toLowerCase().includes(query) ||
+          String(w.presensi).includes(query) ||
+          w.pin.toLowerCase().includes(query);
+        const matchesReject = !filterRejectOnly || (Number(wData.reject) || 0) > 0;
+        return matchesQuery && matchesReject;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 px-4 text-center text-xs text-slate-500">
+              Tidak ada data staf produksi yang sesuai.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered
+        .map((w) => {
+          const wData = day.workers?.[String(w.index)] || {
+            lolos: 0,
+            reject: 0,
+            waktuMulai: day.jamMulai || '07:30',
+            waktuSelesai: day.jamSelesai || '15:00',
+            durasiMenit: 0,
+          };
+          const lolos = Number(wData.lolos) || 0;
+          const reject = Number(wData.reject) || 0;
+          const wMulai = wData.waktuMulai || day.jamMulai || '07:30';
+          const wSelesai = wData.waktuSelesai || day.jamSelesai || '15:00';
+          const durMenit =
+            wData.durasiMenit !== undefined
+              ? Number(wData.durasiMenit) || 0
+              : computeMinutesBetween(wMulai, wSelesai);
+
+          // Rumus Buku Pegangan: (pencapaian produksi / 15) * 100%
+          const prodPct = ((lolos / 15) * 100).toFixed(1) + '%';
+          const grade = calculateWorkerGrade(lolos, reject);
+
+          return `
+            <tr class="hover:bg-slate-800/30 transition">
+              <td class="py-2.5 px-3 text-center font-mono-num text-xs font-semibold text-slate-300">#${w.presensi}</td>
+              <td class="py-2.5 px-4 font-medium text-white">${w.name}</td>
+
+              <td class="py-2.5 px-3">
+                <div class="flex flex-wrap items-center justify-center gap-1 font-mono-num text-xs">
+                  <input
+                    type="time"
+                    value="${wMulai}"
+                    onchange="setWorkerTime(${w.index}, 'waktuMulai', this.value)"
+                    class="px-1.5 py-1 rounded-lg bg-[#0B0F17] border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-500/60"
+                  />
+                  <span class="text-slate-600">–</span>
+                  <input
+                    type="time"
+                    value="${wSelesai}"
+                    onchange="setWorkerTime(${w.index}, 'waktuSelesai', this.value)"
+                    class="px-1.5 py-1 rounded-lg bg-[#0B0F17] border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-500/60"
+                  />
+                  <span class="text-[11px] text-slate-500 ml-1">(${durMenit}m)</span>
+                </div>
+              </td>
+
+              <td class="py-2.5 px-3">
+                <div class="flex items-center justify-center gap-1">
+                  <button
+                    type="button"
+                    onclick="stepWorkerMetric(${w.index}, 'lolos', -1)"
+                    class="w-7 h-7 rounded-lg bg-[#0B0F17] hover:bg-slate-800 text-slate-400 font-mono-num border border-slate-800 cursor-pointer"
+                  >-</button>
+                  <input
+                    type="number"
+                    min="0"
+                    value="${lolos}"
+                    onchange="setWorkerMetric(${w.index}, 'lolos', this.value)"
+                    class="no-spinner w-12 text-center py-1 rounded-lg bg-[#0B0F17] border border-slate-800 font-mono-num text-xs font-semibold text-emerald-400 focus:outline-none focus:border-emerald-500/60"
+                  />
+                  <button
+                    type="button"
+                    onclick="stepWorkerMetric(${w.index}, 'lolos', 1)"
+                    class="w-7 h-7 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-mono-num cursor-pointer"
+                  >+</button>
+                </div>
+              </td>
+
+              <td class="py-2.5 px-3">
+                <div class="flex items-center justify-center gap-1">
+                  <button
+                    type="button"
+                    onclick="stepWorkerMetric(${w.index}, 'reject', -1)"
+                    class="w-7 h-7 rounded-lg bg-[#0B0F17] hover:bg-slate-800 text-slate-400 font-mono-num border border-slate-800 cursor-pointer"
+                  >-</button>
+                  <input
+                    type="number"
+                    min="0"
+                    value="${reject}"
+                    onchange="setWorkerMetric(${w.index}, 'reject', this.value)"
+                    class="no-spinner w-12 text-center py-1 rounded-lg bg-[#0B0F17] border border-slate-800 font-mono-num text-xs font-semibold text-red-400 focus:outline-none focus:border-red-500/60"
+                  />
+                  <button
+                    type="button"
+                    onclick="stepWorkerMetric(${w.index}, 'reject', 1)"
+                    class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 font-mono-num cursor-pointer"
+                  >+</button>
+                </div>
+              </td>
+
+              <td class="py-2.5 px-3 text-center font-mono-num text-xs text-slate-300">${prodPct}</td>
+
+              <td class="py-2.5 px-4 text-center">
+                <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-mono-num font-semibold ${grade.badgeClass}">
+                  ${grade.label}
+                </span>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    function renderAttendanceLists() {
+      const day = dbState.days[activeDateId];
+      const statuses = ['Hadir', 'Izin', 'Sakit', 'Alfa'];
+
+      const buildRow = (person, subtitle) => {
+        const currentStatus = day.attendance?.[person.pin] || 'Hadir';
+        return `
+          <div class="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono-num font-semibold text-emerald-400">#${person.presensi}</span>
+                <span class="text-xs sm:text-sm font-medium text-white">${person.name}</span>
+                <span class="text-[11px] font-mono-num text-slate-500">PIN ${person.pin}</span>
+              </div>
+              <div class="text-[11px] text-slate-500">${subtitle}</div>
+            </div>
+            <div class="flex items-center gap-1">
+              ${statuses
+                .map((st) => {
+                  const active = currentStatus === st;
+                  let activeStyle = 'bg-emerald-500 text-slate-950 font-semibold';
+                  if (st === 'Izin') activeStyle = 'bg-sky-500 text-slate-950 font-semibold';
+                  if (st === 'Sakit') activeStyle = 'bg-amber-400 text-slate-950 font-semibold';
+                  if (st === 'Alfa') activeStyle = 'bg-red-500 text-white font-semibold';
+
+                  return `
+                    <button
+                      type="button"
+                      onclick="setAttendance('${person.pin}', '${st}')"
+                      class="px-2.5 py-1 rounded-lg text-[11px] transition cursor-pointer ${
+                        active
+                          ? activeStyle
+                          : 'bg-[#111622] text-slate-400 hover:text-slate-200 border border-slate-800/70'
+                      }"
+                    >
+                      ${st}
+                    </button>
+                  `;
+                })
+                .join('')}
+            </div>
+          </div>
+        `;
+      };
+
+      document.getElementById('attendance-mgmt-list').innerHTML = MANAGEMENT_PERSONNEL.map((p) =>
+        buildRow(p, p.role)
+      ).join('');
+
+      document.getElementById('attendance-staff-list').innerHTML = PRODUCTION_WORKERS.map((w) =>
+        buildRow(w, 'Staf Unit Produksi (Target 10 pcs)')
+      ).join('');
+    }
+
+    function renderRecapTab() {
+      const recapBody = document.getElementById('recap-4days-body');
+      let sumUnit = 0;
+      let sumLolos = 0;
+      let sumReject = 0;
+
+      const rowsHtml = SCHEDULE_DAYS.map((d) => {
+        const day = dbState.days[d.id];
+        const m = getDayMetrics(d.id);
+        sumUnit += m.totalUnit;
+        sumLolos += m.totalLolos;
+        sumReject += m.totalReject;
+
+        return `
+          <tr class="hover:bg-slate-800/30">
+            <td class="py-3 px-4 font-sans font-medium text-white">${d.fullLabel}</td>
+            <td class="py-3 px-3 text-center text-slate-400">${day.jamMulai || '07:30'}</td>
+            <td class="py-3 px-3 text-center text-slate-400">${day.jamSelesai || '15:00'}</td>
+            <td class="py-3 px-3 text-right font-semibold text-slate-200">${m.totalUnit}</td>
+            <td class="py-3 px-3 text-right font-semibold text-emerald-400">${m.totalLolos}</td>
+            <td class="py-3 px-3 text-right font-semibold text-red-400">${m.totalReject}</td>
+            <td class="py-3 px-4 text-center font-sans text-xs text-slate-400">Nico (#1)</td>
+          </tr>
+        `;
+      }).join('');
+
+      recapBody.innerHTML =
+        rowsHtml +
+        `
+          <tr class="bg-emerald-500/10 font-bold text-white">
+            <td class="py-3 px-4 font-sans text-emerald-400" colspan="3">TOTAL (4 HARI KERJA)</td>
+            <td class="py-3 px-3 text-right text-white">${sumUnit}</td>
+            <td class="py-3 px-3 text-right text-emerald-400">${sumLolos}</td>
+            <td class="py-3 px-3 text-right text-red-400">${sumReject}</td>
+            <td class="py-3 px-4 text-center font-sans text-xs text-emerald-300">-</td>
+          </tr>
+        `;
+
+      const gradesBody = document.getElementById('recap-grades-body');
+      gradesBody.innerHTML = PRODUCTION_WORKERS.map((w) => {
+        let accLolos = 0;
+        let accReject = 0;
+        SCHEDULE_DAYS.forEach((d) => {
+          const wData = dbState.days[d.id]?.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+          accLolos += Number(wData.lolos) || 0;
+          accReject += Number(wData.reject) || 0;
+        });
+
+        const avgLolos = (accLolos / 4).toFixed(2);
+        const avgReject = (accReject / 4).toFixed(2);
+        const grade = calculateWorkerGrade(Math.round(Number(avgLolos)), Math.round(Number(avgReject)));
+
+        return `
+          <tr class="hover:bg-slate-800/30">
+            <td class="py-2.5 px-3 text-center font-mono-num text-xs font-semibold text-slate-300">#${w.presensi}</td>
+            <td class="py-2.5 px-4 font-medium text-white">${w.name}</td>
+            <td class="py-2.5 px-3 text-right font-mono-num font-semibold text-emerald-400">${accLolos} pcs</td>
+            <td class="py-2.5 px-3 text-right font-mono-num font-semibold text-red-400">${accReject} unit</td>
+            <td class="py-2.5 px-3 text-right font-mono-num text-slate-300">${avgLolos} pcs/hr <span class="text-[11px] text-slate-500">(rej ${avgReject})</span></td>
+            <td class="py-2.5 px-4 text-center">
+              <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-mono-num font-semibold ${grade.badgeClass}">
+                ${grade.label}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderLogisticsAndDocs() {
+      const day = dbState.days[activeDateId];
+      const metrics = getDayMetrics(activeDateId);
+
+      document.getElementById('stok-ambil-input').value = day.stokAmbil || 0;
+      document.getElementById('stok-setor-input').value = day.stokSetor || 0;
+      document.getElementById('stok-catatan-input').value = day.stokCatatan || '';
+
+      const selisih = (Number(day.stokAmbil) || 0) - metrics.totalLolos;
+      const selisihEl = document.getElementById('stok-selisih-display');
+      selisihEl.textContent = `${selisih > 0 ? '+' : ''}${selisih}`;
+      selisihEl.className = `text-base font-bold font-mono-num ${
+        selisih < 0 ? 'text-red-400' : selisih > 0 ? 'text-amber-400' : 'text-emerald-400'
+      }`;
+
+      const fiveRContainer = document.getElementById('five-r-container');
+      fiveRContainer.innerHTML = FIVE_R_ITEMS.map((label, idx) => {
+        const checked = Boolean(day.fiveR?.[idx]);
+        return `
+          <button
+            type="button"
+            onclick="toggleFiveR(${idx})"
+            class="p-2.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 ${
+              checked
+                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300'
+                : 'bg-[#0B0F17] border-slate-800/70 text-slate-400 hover:border-slate-700'
+            }"
+          >
+            <i data-lucide="${checked ? 'check-square' : 'square'}" class="w-4 h-4 ${
+              checked ? 'text-emerald-400' : 'text-slate-600'
+            }"></i>
+            <span class="text-[11px] font-semibold">${label}</span>
+          </button>
+        `;
+      }).join('');
+      document.getElementById('catatan-5r-input').value = day.catatan5R || '';
+
+      const kasMasuk = Number(day.kasPemasukan) || 0;
+      const kasKeluar = Number(day.kasPengeluaran) || 0;
+      const saldo = kasMasuk - kasKeluar;
+
+      document.getElementById('kas-masuk-input').value = kasMasuk;
+      document.getElementById('kas-keluar-input').value = kasKeluar;
+      document.getElementById('kas-ket-input').value = day.kasKeterangan || '';
+      const saldoEl = document.getElementById('kas-saldo-display');
+      saldoEl.textContent = formatRupiah(saldo);
+      saldoEl.className = `text-base font-bold font-mono-num ${saldo < 0 ? 'text-red-400' : 'text-sky-400'}`;
+
+      document.getElementById('link-video-input').value = day.linkVideo || '';
+      document.getElementById('catatan-admin-input').value = day.catatanAdmin || '';
+
+      const logs = Array.isArray(day.logPelanggaranTab) ? day.logPelanggaranTab : [];
+      document.getElementById('pelanggaran-count-badge').textContent = `${logs.length} log`;
+      const logListEl = document.getElementById('pelanggaran-log-list');
+      if (logs.length === 0) {
+        logListEl.innerHTML = `<div class="text-slate-500 py-1.5">Tidak ada pelanggaran keluar tab hari ini.</div>`;
+      } else {
+        logListEl.innerHTML = logs
+          .map((item) => {
+            if (typeof item === 'string') {
+              return `<div class="p-2 rounded-lg bg-amber-500/10 text-amber-200">${item}</div>`;
+            }
+            const waktu = item.waktu || item.timestamp || '-';
+            const nama = item.nama || item.user || 'Koordinator';
+            const ket = item.keterangan || item.detail || 'Keluar dari tab saat jam kerja';
+            return `<div class="p-2 rounded-lg bg-amber-500/10 text-amber-200">[${waktu}] <strong>${nama}</strong>: ${ket}</div>`;
+          })
+          .join('');
+      }
+    }
+
+    function renderPrintSheet() {
+      const day = dbState.days[activeDateId];
+      const activeDayObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
+      const m = getDayMetrics(activeDateId);
+
+      document.getElementById('print-tanggal').textContent = activeDayObj.fullLabel;
+      document.getElementById('print-kelas-ruang').textContent = `${dbState.meta.kelas} / ${dbState.meta.ruang}`;
+      document.getElementById('print-jam-shift').textContent = `${day.jamMulai} - ${day.jamSelesai}`;
+
+      document.getElementById('print-kpi-lolos').textContent = `${m.totalLolos} pcs`;
+      document.getElementById('print-kpi-reject').textContent = `${m.totalReject} unit`;
+      document.getElementById('print-kpi-kemasan').textContent = `${m.packingVerified} ikat`;
+      document.getElementById('print-kpi-hadir').textContent = `${m.hadirCount} / ${m.totalPersonel}`;
+
+      document.getElementById('print-stok-ambil').textContent = `${day.stokAmbil || 0} set`;
+      document.getElementById('print-stok-setor').textContent = `${day.stokSetor || 0} pcs`;
+      document.getElementById('print-kas-masuk').textContent = formatRupiah(day.kasPemasukan || 0);
+      document.getElementById('print-kas-keluar').textContent = formatRupiah(day.kasPengeluaran || 0);
+
+      const active5R = FIVE_R_ITEMS.filter((_, idx) => Boolean(day.fiveR?.[idx]));
+      document.getElementById('print-5r-status').textContent =
+        active5R.length > 0 ? active5R.join(', ') : 'Belum ada centang';
+      document.getElementById('print-catatan-5r').textContent = day.catatan5R || '-';
+
+      let sumUnit = 0;
+      let sumLolos = 0;
+      let sumReject = 0;
+
+      const print4DaysHtml = SCHEDULE_DAYS.map((d) => {
+        const dObj = dbState.days[d.id];
+        const dm = getDayMetrics(d.id);
+        sumUnit += dm.totalUnit;
+        sumLolos += dm.totalLolos;
+        sumReject += dm.totalReject;
+        return `
+          <tr>
+            <td>${d.fullLabel}</td>
+            <td class="text-center">${dObj.jamMulai}</td>
+            <td class="text-center">${dObj.jamSelesai}</td>
+            <td class="text-right">${dm.totalUnit}</td>
+            <td class="text-right">${dm.totalLolos}</td>
+            <td class="text-right">${dm.totalReject}</td>
+            <td class="text-center"></td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('print-4days-tbody').innerHTML =
+        print4DaysHtml +
+        `
+          <tr>
+            <td colspan="3"><strong>TOTAL</strong></td>
+            <td class="text-right"><strong>${sumUnit}</strong></td>
+            <td class="text-right"><strong>${sumLolos}</strong></td>
+            <td class="text-right"><strong>${sumReject}</strong></td>
+            <td class="text-center"></td>
+          </tr>
+        `;
+
+      document.getElementById('print-workers-tbody').innerHTML = PRODUCTION_WORKERS.map((w) => {
+        const wData = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+        const lolos = Number(wData.lolos) || 0;
+        const reject = Number(wData.reject) || 0;
+        const wMulai = wData.waktuMulai || day.jamMulai || '07:30';
+        const wSelesai = wData.waktuSelesai || day.jamSelesai || '15:00';
+        const dur =
+          wData.durasiMenit !== undefined
+            ? Number(wData.durasiMenit) || 0
+            : computeMinutesBetween(wMulai, wSelesai);
+        const prod = ((lolos / 15) * 100).toFixed(1) + '%';
+        const grade = calculateWorkerGrade(lolos, reject).label;
+        const absen = day.attendance?.[w.pin] || 'Hadir';
+        return `
+          <tr>
+            <td class="text-center">#${w.presensi}</td>
+            <td>${w.name}</td>
+            <td class="text-center">${wMulai}–${wSelesai} (${dur}m)</td>
+            <td class="text-center">${absen}</td>
+            <td class="text-right">${lolos}</td>
+            <td class="text-right">${reject}</td>
+            <td class="text-right">${prod}</td>
+            <td class="text-center">${grade}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('print-catatan-admin').textContent = day.catatanAdmin || '-';
+      document.getElementById('print-ttd-instruktur').textContent =
+        dbState.meta.instruktur && dbState.meta.instruktur.trim() !== ''
+          ? dbState.meta.instruktur.trim()
+          : '( __________________ )';
+    }
+
+    function selectDate(dateId) {
+      activeDateId = dateId;
+      renderAll();
+    }
+
+    function switchTab(tabNum) {
+      activeTab = tabNum;
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`tab-btn-${i}`);
+        const panel = document.getElementById(`tab-panel-${i}`);
+        if (i === tabNum) {
+          btn.className =
+            'tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer bg-emerald-500 text-slate-950';
+          panel.classList.remove('hidden');
+        } else {
+          btn.className =
+            'tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer bg-[#111622] text-slate-400 hover:text-slate-200 border border-slate-800/80';
+          panel.classList.add('hidden');
+        }
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateDayField(field, value) {
+      dbState.days[activeDateId][field] = value;
+      persistDatabase('Tersimpan');
+    }
+
+    function stepPacking(delta) {
+      const current = Number(dbState.days[activeDateId].packingVerified) || 0;
+      const nextVal = Math.max(0, current + delta);
+      dbState.days[activeDateId].packingVerified = nextVal;
+      persistDatabase(`Dikemas: ${nextVal} ikat`);
+    }
+
+    function setPackingVerified(val) {
+      const nextVal = Math.max(0, Number(val) || 0);
+      dbState.days[activeDateId].packingVerified = nextVal;
+      persistDatabase(`Dikemas: ${nextVal} ikat`);
+    }
+
+    function setWorkerTime(workerIndex, field, val) {
+      const day = dbState.days[activeDateId];
+      const key = String(workerIndex);
+      const curr = day.workers[key] || {
+        lolos: 0,
+        reject: 0,
+        waktuMulai: day.jamMulai || '07:30',
+        waktuSelesai: day.jamSelesai || '15:00',
+        durasiMenit: 0,
+      };
+      const updated = { ...curr, [field]: val || '' };
+      updated.durasiMenit = computeMinutesBetween(updated.waktuMulai, updated.waktuSelesai);
+      day.workers[key] = updated;
+      persistDatabase('Waktu pekerja diperbarui');
+    }
+
+    function stepWorkerMetric(workerIndex, metric, delta) {
+      const key = String(workerIndex);
+      const curr = dbState.days[activeDateId].workers[key] || { lolos: 0, reject: 0 };
+      const nextVal = Math.max(0, (Number(curr[metric]) || 0) + delta);
+      dbState.days[activeDateId].workers[key] = { ...curr, [metric]: nextVal };
+      persistDatabase('Data diperbarui');
+    }
+
+    function setWorkerMetric(workerIndex, metric, rawVal) {
+      const key = String(workerIndex);
+      const curr = dbState.days[activeDateId].workers[key] || { lolos: 0, reject: 0 };
+      const nextVal = Math.max(0, Number(rawVal) || 0);
+      dbState.days[activeDateId].workers[key] = { ...curr, [metric]: nextVal };
+      persistDatabase('Data diperbarui');
+    }
+
+    function toggleFilterReject() {
+      filterRejectOnly = !filterRejectOnly;
+      const btn = document.getElementById('filter-reject-btn');
+      if (filterRejectOnly) {
+        btn.className =
+          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer bg-red-500/15 text-red-300 border-red-500/40';
+      } else {
+        btn.className =
+          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer bg-[#0B0F17] text-slate-400 border-slate-800 hover:text-red-300';
+      }
+      renderWorkersTable();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function setAttendance(pin, status) {
+      dbState.days[activeDateId].attendance[pin] = status;
+      persistDatabase(`Presensi PIN ${pin}: ${status}`);
+    }
+
+    function markAllPresent() {
+      const att = dbState.days[activeDateId].attendance;
+      MANAGEMENT_PERSONNEL.forEach((p) => (att[p.pin] = 'Hadir'));
+      PRODUCTION_WORKERS.forEach((w) => (att[w.pin] = 'Hadir'));
+      persistDatabase('Semua 35 murid Hadir');
+    }
+
+    function toggleFiveR(idx) {
+      const arr = [...(dbState.days[activeDateId].fiveR || [false, false, false, false, false])];
+      arr[idx] = !arr[idx];
+      dbState.days[activeDateId].fiveR = arr;
+      persistDatabase(`5R ${FIVE_R_ITEMS[idx]} diperbarui`);
+    }
+
+    function openDriveVideo() {
+      const url = (document.getElementById('link-video-input').value || '').trim();
+      if (!url) {
+        showToast('Masukkan tautan URL Google Drive terlebih dahulu.');
+        return;
+      }
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('meta-kelas-input').value = dbState.meta.kelas;
+      document.getElementById('meta-ruang-input').value = dbState.meta.ruang;
+      document.getElementById('meta-instruktur-input').value = dbState.meta.instruktur;
+      document.getElementById('meta-target-input').value = dbState.meta.targetHarianKelas;
+
+      const modal = document.getElementById('settings-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeSettingsModal() {
+      const modal = document.getElementById('settings-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('settings-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      dbState.meta.kelas = document.getElementById('meta-kelas-input').value.trim() || 'X TE 2';
+      dbState.meta.ruang = document.getElementById('meta-ruang-input').value.trim() || 'Ruang 84';
+      dbState.meta.instruktur = document.getElementById('meta-instruktur-input').value.trim();
+      dbState.meta.targetHarianKelas = Math.max(
+        1,
+        Number(document.getElementById('meta-target-input').value) || 230
+      );
+      closeSettingsModal();
+      persistDatabase('Identitas kelas disimpan');
+    });
+
+    function exportDayCSV() {
+      const day = dbState.days[activeDateId];
+      const lines = [
+        [
+          'No. Presensi',
+          'Nama Pekerja',
+          'Waktu Mulai',
+          'Waktu Selesai',
+          'Durasi (Menit)',
+          'Absensi',
+          'Lolos QC',
+          'Reject',
+          '% Produktivitas (/15)',
+          'Konversi Nilai',
+        ].join(','),
+      ];
+
+      PRODUCTION_WORKERS.forEach((w) => {
+        const wData = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+        const lolos = Number(wData.lolos) || 0;
+        const reject = Number(wData.reject) || 0;
+        const wMulai = wData.waktuMulai || day.jamMulai || '07:30';
+        const wSelesai = wData.waktuSelesai || day.jamSelesai || '15:00';
+        const dur =
+          wData.durasiMenit !== undefined
+            ? Number(wData.durasiMenit) || 0
+            : computeMinutesBetween(wMulai, wSelesai);
+        const prodPct = ((lolos / 15) * 100).toFixed(1);
+        const grade = calculateWorkerGrade(lolos, reject).label;
+        const absen = day.attendance?.[w.pin] || 'Hadir';
+
+        lines.push(
+          [
+            w.presensi,
+            `"${w.name.replace(/"/g, '""')}"`,
+            wMulai,
+            wSelesai,
+            dur,
+            absen,
+            lolos,
+            reject,
+            prodPct,
+            `"${grade}"`,
+          ].join(',')
+        );
+      });
+
+      const csvContent = '\uFEFF' + lines.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `TEFA_UnitProduksi_${dbState.meta.kelas.replace(/\s+/g, '_')}_${activeDateId}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`CSV ${activeDateId} diunduh`);
+    }
+
+    function triggerPrintReport() {
+      renderPrintSheet();
+      window.print();
+    }
+
+    function formatRupiah(num) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+      }).format(Number(num) || 0);
+    }
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className =
+        'px-3.5 py-2 rounded-xl bg-[#111622] border border-slate-800 text-xs font-medium text-emerald-400 shadow-lg flex items-center gap-2 transition-all duration-300';
+      toast.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initFirebaseOrFallback();
+      restoreSession();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

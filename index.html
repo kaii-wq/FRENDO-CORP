@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TEFA Portal Lapangan — SMK Negeri 3 Yogyakarta (Kelas X TE 2)</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Firebase JS SDK v10 Compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+  <style>
+    body {
+      background-color: #0B0F17;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      overscroll-behavior-y: contain;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0F17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 9999px;
+    }
+    input[type="number"].no-spinner::-webkit-inner-spin-button,
+    input[type="number"].no-spinner::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"].no-spinner {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0B0F17] text-slate-200 antialiased selection:bg-emerald-500/20 selection:text-emerald-200">
+
+  <!-- FIREBASE CONFIGURATION -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAz5XgzNnll5ON_C7sTIZT9iRuzHL_63w",
+      authDomain: "tefa-aa841.firebaseapp.com",
+      databaseURL: "https://tefa-aa841-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tefa-aa841",
+      storageBucket: "tefa-aa841.firebasestorage.app",
+      messagingSenderId: "645319588053",
+      appId: "1:645319588053:web:0e237892078ad3e9380a5c",
+      measurementId: "G-DMTB0V43J9"
+    };
+  </script>
+
+  <!-- 1. LAYAR LOGIN PORTAL LAPANGAN -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-[#0B0F17]">
+    <div class="w-full max-w-md rounded-2xl bg-[#111622] border border-slate-800/80 shadow-xl overflow-hidden">
+      <div class="p-6 border-b border-slate-800/60">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <span class="inline-flex items-center gap-1.5 text-xs font-mono-num font-medium text-emerald-400">
+            <i data-lucide="hard-hat" class="w-4 h-4"></i>
+            PORTAL LAPANGAN
+          </span>
+          <span id="login-db-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-num text-amber-400 bg-amber-500/10">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            LocalStorage Mode
+          </span>
+        </div>
+
+        <h1 class="text-xl font-bold tracking-tight text-white">
+          SMK Negeri 3 Yogyakarta
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">
+          Perakitan Songsong Helm Latih • Kelas X TE 2 (Ruang 84)
+        </p>
+      </div>
+
+      <form id="field-login-form" class="p-6 space-y-4">
+        <div>
+          <label for="personnel-select" class="block text-xs font-medium text-slate-400 mb-1.5">
+            Pilih No. Presensi, Nama &amp; Peran
+          </label>
+          <select
+            id="personnel-select"
+            required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-[#0B0F17] border border-slate-800 text-sm font-medium text-white focus:outline-none focus:border-emerald-500/70"
+          >
+            <option value="">-- Pilih Murid --</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="field-pin-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+            PIN Akses (4 Digit)
+          </label>
+          <input
+            id="field-pin-input"
+            type="password"
+            inputmode="numeric"
+            maxlength="4"
+            autocomplete="off"
+            placeholder="••••"
+            required
+            class="w-full text-center text-2xl tracking-[0.5em] font-mono-num font-semibold py-2.5 px-4 rounded-xl bg-[#0B0F17] border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/70"
+          />
+          <p id="field-login-error" class="hidden mt-2 text-xs text-red-400 flex items-center gap-1.5">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+            <span id="field-login-error-text">PIN tidak sesuai dengan murid yang dipilih.</span>
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          Masuk Pos Operasional
+        </button>
+
+        <div class="pt-3 border-t border-slate-800/60 text-[11px] text-slate-500 space-y-1">
+          <div class="flex justify-between font-mono-num">
+            <span>Koordinator (Presensi #4–#12):</span>
+            <span class="text-slate-300">1004 – 1012</span>
+          </div>
+          <div class="flex justify-between font-mono-num">
+            <span>Staf Produksi (Presensi #13–#35):</span>
+            <span class="text-slate-300">2001 – 2023</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. SHELL UTAMA PORTAL OPERASIONAL LAPANGAN -->
+  <div id="portal-shell" class="hidden min-h-screen flex flex-col">
+    <header class="sticky top-0 z-30 bg-[#0B0F17]/90 backdrop-blur-md border-b border-slate-800/70">
+      <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2.5">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span id="header-user-name" class="text-sm sm:text-base font-bold text-white truncate">-</span>
+            <span id="header-db-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono-num text-amber-400 bg-amber-500/10 shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+              LocalStorage Mode
+            </span>
+          </div>
+          <div id="header-user-role" class="text-[11px] text-slate-400 truncate">-</div>
+        </div>
+
+        <button
+          type="button"
+          onclick="logoutPortal()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#111622] hover:bg-red-500/10 text-slate-300 hover:text-red-400 border border-slate-800 transition shrink-0 cursor-pointer"
+        >
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-5 space-y-4">
+
+      <!-- Banner Peringatan Kembali ke Tab -->
+      <div id="tab-violation-alert" class="hidden rounded-2xl bg-red-500/10 border border-red-500/40 p-4 text-red-200">
+        <div class="flex items-start gap-3">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-red-400 shrink-0 mt-0.5"></i>
+          <div class="flex-1 text-xs">
+            <div class="font-bold text-red-300">Keluar Halaman Terdeteksi</div>
+            <p class="mt-0.5 text-red-200/80">
+              Aktivitas berpindah tab saat shift telah tercatat otomatis ke log pengawasan.
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="dismissViolationAlert()"
+            class="text-xs font-medium px-2.5 py-1 rounded-lg bg-red-500/20 text-red-200 cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Fokus & Anti-Main HP Banner (Khusus Koordinator #4-#12) -->
+      <section id="coordinator-focus-panel" class="hidden rounded-2xl bg-[#111622] border border-slate-800/70 p-4 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
+              <i data-lucide="smartphone" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-xs sm:text-sm font-bold text-white">Mode Fokus Koordinator</h2>
+                <span id="wakelock-status-pill" class="text-[10px] font-mono-num px-2 py-0.5 rounded-full bg-[#0B0F17] text-slate-400">
+                  Wake Lock: Memeriksa...
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Layar dijaga tetap menyala. Hindari membuka aplikasi lain selama shift berlangsung.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onclick="toggleFullscreenMode()"
+            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-slate-950 transition shrink-0 cursor-pointer"
+          >
+            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+            <span>Fullscreen</span>
+          </button>
+        </div>
+
+        <div class="rounded-xl bg-[#0B0F17] p-3 text-[11px] text-slate-400 flex items-start gap-2">
+          <i data-lucide="pin" class="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>
+            <strong class="text-slate-200">Tips Sematkan Layar:</strong> Buka <em>Recent Apps</em>, ketuk ikon browser di bagian atas, lalu pilih <strong>Sematkan Layar (Pin App)</strong>.
+          </span>
+        </div>
+      </section>
+
+      <!-- Navigasi Jadwal 4 Hari Kerja -->
+      <section class="rounded-2xl bg-[#111622] border border-slate-800/70 p-3.5 space-y-3">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="field-date-tabs"></div>
+        <div class="pt-2 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-num text-slate-400">
+          <span>Tanggal: <strong id="field-active-date-label" class="text-slate-200">-</strong></span>
+          <span><strong id="field-meta-kelas" class="text-slate-200">X TE 2</strong> • <strong id="field-meta-ruang" class="text-slate-200">Ruang 84</strong></span>
+          <span>Target: <strong id="field-meta-target" class="text-emerald-400">230 pcs</strong></span>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 1: QUALITY CONTROL (PRESENSI #7 & #8) -->
+      <section id="view-qc" class="role-view hidden">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] font-mono-num text-emerald-400 font-medium">Quality Control • Presensi #7 &amp; #8</span>
+              <h2 class="text-base font-bold text-white">Kontrol Kualitas per Pekerja (#13–#35)</h2>
+            </div>
+
+            <div class="relative w-full sm:w-60">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input
+                id="qc-search-input"
+                type="text"
+                oninput="renderQCView()"
+                placeholder="Cari nama / no. presensi..."
+                class="w-full pl-8 pr-3 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60"
+              />
+            </div>
+          </div>
+
+          <div id="qc-workers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 2: STOK OPNAME BARANG (PRESENSI #4 & #5) -->
+      <section id="view-stok" class="role-view hidden">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-6 space-y-5">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-mono-num text-emerald-400 font-medium">Gudang BLUD (RPS Belakang) • Presensi #4 &amp; #5</span>
+              <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Stok Opname Barang</h2>
+            </div>
+            <i data-lucide="warehouse" class="w-5 h-5 text-slate-500 shrink-0"></i>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="stok-ambil-field" class="block text-xs font-medium text-slate-400 mb-1.5">Bahan Diambil (Set)</label>
+              <input
+                id="stok-ambil-field"
+                type="number"
+                min="0"
+                onchange="updateDayValue('stokAmbil', Math.max(0, Number(this.value) || 0))"
+                class="no-spinner w-full px-4 py-2.5 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-lg font-bold text-white focus:outline-none focus:border-emerald-500/60"
+              />
+            </div>
+
+            <div>
+              <label for="stok-setor-field" class="block text-xs font-medium text-slate-400 mb-1.5">Barang Jadi Disetor (pcs)</label>
+              <input
+                id="stok-setor-field"
+                type="number"
+                min="0"
+                onchange="updateDayValue('stokSetor', Math.max(0, Number(this.value) || 0))"
+                class="no-spinner w-full px-4 py-2.5 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-lg font-bold text-white focus:outline-none focus:border-emerald-500/60"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="stok-catatan-field" class="block text-xs font-medium text-slate-400 mb-1.5">
+              Dokumen Pengambilan / Surat Jalan &amp; Kecocokan Barang
+            </label>
+            <textarea
+              id="stok-catatan-field"
+              rows="3"
+              onchange="updateDayValue('stokCatatan', this.value)"
+              placeholder="Catatan surat jalan pengambilan & penyerahan barang jadi / sisa..."
+              class="w-full px-4 py-2.5 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/60"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3.5">
+            <div class="p-4 rounded-xl bg-[#0B0F17] border border-slate-800/60">
+              <div class="text-xs text-slate-400">Total Lolos QC</div>
+              <div id="stok-total-lolos-display" class="text-xl font-bold font-mono-num text-emerald-400 mt-1">0 pcs</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#0B0F17] border border-slate-800/60">
+              <div class="text-xs text-slate-400">Selisih (Ambil - Lolos)</div>
+              <div id="stok-selisih-field-display" class="text-xl font-bold font-mono-num text-sky-400 mt-1">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 3: KEPALA UNIT PRODUKSI (PRESENSI #6) -->
+      <section id="view-prod-head" class="role-view hidden">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] font-mono-num text-emerald-400 font-medium">Kepala Unit Produksi • Presensi #6</span>
+              <h2 class="text-base font-bold text-white">Waktu Produksi &amp; Progres Staf (#13–#35)</h2>
+            </div>
+
+            <div class="flex items-center gap-2 bg-[#0B0F17] p-2 rounded-xl border border-slate-800/60">
+              <div>
+                <label for="head-jam-mulai" class="block text-[10px] text-slate-400">Mulai</label>
+                <input
+                  id="head-jam-mulai"
+                  type="time"
+                  onchange="updateDayValue('jamMulai', this.value)"
+                  class="bg-[#111622] border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono-num text-white"
+                />
+              </div>
+              <div>
+                <label for="head-jam-selesai" class="block text-[10px] text-slate-400">Selesai</label>
+                <input
+                  id="head-jam-selesai"
+                  type="time"
+                  onchange="updateDayValue('jamSelesai', this.value)"
+                  class="bg-[#111622] border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono-num text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              id="head-filter-all"
+              type="button"
+              onclick="setHeadFilter('all')"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500 text-slate-950 cursor-pointer"
+            >
+              Semua (23)
+            </button>
+            <button
+              id="head-filter-below"
+              type="button"
+              onclick="setHeadFilter('below')"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium bg-[#0B0F17] text-slate-400 border border-slate-800 cursor-pointer"
+            >
+              Belum Target &lt;10
+            </button>
+            <button
+              id="head-filter-met"
+              type="button"
+              onclick="setHeadFilter('met')"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium bg-[#0B0F17] text-slate-400 border border-slate-800 cursor-pointer"
+            >
+              Sesuai/Melebihi &ge;10
+            </button>
+          </div>
+
+          <div id="head-workers-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 4: PENGEMASAN DAN PENGIRIMAN (PRESENSI #9 & #10) -->
+      <section id="view-packing" class="role-view hidden">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-6 space-y-5">
+          <div>
+            <span class="text-[11px] font-mono-num text-sky-400 font-medium">Pengemasan dan Pengiriman • Presensi #9 &amp; #10</span>
+            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Kalkulator Ikatan Kemasan (Menali per 5 pcs)</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 rounded-xl bg-[#0B0F17] border border-slate-800/60">
+              <div class="text-xs text-slate-400">Lolos QC</div>
+              <div id="pack-total-lolos" class="text-2xl sm:text-3xl font-bold font-mono-num text-emerald-400 mt-1">0 pcs</div>
+              <div class="text-[11px] text-slate-500 mt-1">Dinyatakan lolos QC</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#0B0F17] border border-slate-800/60">
+              <div class="text-xs text-slate-400">Rekomendasi Ikatan (@5)</div>
+              <div id="pack-calc-ikat" class="text-2xl sm:text-3xl font-bold font-mono-num text-sky-400 mt-1">0 Ikat</div>
+              <div id="pack-calc-sisa" class="text-xs font-mono-num text-amber-400 mt-1">Sisa: 0 pcs</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#0B0F17] border border-slate-800/60">
+              <label for="pack-verified-input" class="block text-xs font-medium text-sky-400 mb-1.5">
+                Dikemas Terverifikasi (Ikat)
+              </label>
+              <input
+                id="pack-verified-input"
+                type="number"
+                min="0"
+                onchange="updateDayValue('packingVerified', Math.max(0, Number(this.value) || 0))"
+                class="no-spinner w-full px-3 py-2 rounded-xl bg-[#111622] border border-slate-800 font-mono-num text-xl font-bold text-white focus:outline-none focus:border-sky-500/60"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 5: PENANGGUNG JAWAB 5R (PRESENSI #11 & #12) -->
+      <section id="view-5r" class="role-view hidden">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-6 space-y-5">
+          <div>
+            <span class="text-[11px] font-mono-num text-amber-400 font-medium">Penanggung Jawab 5R • Presensi #11 &amp; #12</span>
+            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Checklist Budaya Kerja 5R</h2>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="field-5r-cards"></div>
+
+          <div>
+            <label for="field-5r-note" class="block text-xs font-medium text-slate-400 mb-1.5">
+              Catatan Penataan &amp; Pemeliharaan Tempat Kerja
+            </label>
+            <textarea
+              id="field-5r-note"
+              rows="3"
+              onchange="updateDayValue('catatan5R', this.value)"
+              placeholder="Catat hasil Ringkas, Rapi, Resik, Rawat, Rajin..."
+              class="w-full px-4 py-2.5 rounded-xl bg-[#0B0F17] border border-slate-800 text-xs sm:text-sm text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/60"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 6: STAF UNIT PRODUKSI (PRESENSI #13-#35) -->
+      <section id="view-worker" class="role-view hidden space-y-4">
+        <div id="worker-reject-alert" class="hidden rounded-2xl bg-red-500/10 border border-red-500/40 p-4 text-red-100">
+          <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-400 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="text-sm font-bold text-red-300">
+                Ada barang Reject — segera revisi di meja QC (Presensi #7 &amp; #8)
+              </div>
+              <p class="text-xs text-red-200/80 mt-0.5">
+                Perbaiki unit reject agar hasil perakitan songsong helm memenuhi standar kualitas.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-mono-num text-sky-400 font-medium">Kartu Skor Pribadi (Target 10 pcs)</span>
+              <h2 id="worker-card-name" class="text-lg font-bold text-white mt-0.5">-</h2>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-slate-400">Konversi Nilai</div>
+              <span id="worker-grade-badge" class="inline-block mt-1 px-3 py-1 rounded-lg text-sm font-mono-num font-bold">
+                -
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-xl bg-[#0B0F17] border border-slate-800/60 text-center">
+              <div class="text-[11px] text-slate-400">Lolos QC</div>
+              <div id="worker-stat-lolos" class="text-2xl font-bold font-mono-num text-emerald-400 mt-1">0</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#0B0F17] border border-slate-800/60 text-center">
+              <div class="text-[11px] text-slate-400">Reject</div>
+              <div id="worker-stat-reject" class="text-2xl font-bold font-mono-num text-red-400 mt-1">0</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-[#0B0F17] border border-slate-800/60 text-center">
+              <div class="text-[11px] text-slate-400">% Prod (/15)</div>
+              <div id="worker-stat-prod" class="text-2xl font-bold font-mono-num text-white mt-1">0.0%</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#0B0F17] border border-slate-800/60 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono-num">
+              <span class="text-slate-400">Target Pribadi (10 pcs • KKM 76)</span>
+              <span id="worker-progress-label" class="font-semibold text-emerald-400">0 / 10 pcs</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
+              <div id="worker-progress-bar" class="h-full rounded-full transition-all duration-300 bg-amber-400" style="width: 0%;"></div>
+            </div>
+            <p id="worker-cheer-message" class="text-xs font-medium text-amber-300">
+              Target 10 pcs per anggota belum tercapai.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i data-lucide="target" class="w-4 h-4 text-emerald-400"></i>
+                Target Bersama Kelas
+              </h3>
+              <span id="class-target-pct-text" class="text-sm font-mono-num font-bold text-emerald-400">0%</span>
+            </div>
+
+            <div class="w-full h-2.5 rounded-full bg-[#0B0F17] overflow-hidden">
+              <div id="class-target-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+
+            <div class="flex justify-between text-xs font-mono-num text-slate-400">
+              <span>Tercapai: <strong id="class-target-achieved" class="text-white">0 pcs</strong></span>
+              <span>Target: <strong id="class-target-goal" class="text-emerald-400">230 pcs</strong></span>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-[#111622] border border-slate-800/70 p-4 sm:p-5 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+              Top 3 Pencapaian Tercepat
+            </h3>
+            <div id="worker-podium-list" class="space-y-2"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 3. MODAL INPUT BORONGAN (KHUSUS QC) -->
+  <div id="borongan-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-[#111622] border border-slate-800 shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-800/70 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono-num text-emerald-400 font-medium">Input Borongan QC</span>
+          <h3 id="borongan-worker-title" class="text-base font-bold text-white">-</h3>
+        </div>
+        <button type="button" onclick="closeBoronganModal()" class="text-slate-400 hover:text-white p-1 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="borongan-form" class="p-5 space-y-4">
+        <input type="hidden" id="borongan-worker-index" />
+
+        <div>
+          <label for="borongan-add-lolos" class="block text-xs font-medium text-emerald-400 mb-1">
+            Tambah Lolos QC (+ pcs)
+          </label>
+          <input
+            id="borongan-add-lolos"
+            type="number"
+            min="0"
+            value="0"
+            class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-lg font-bold text-emerald-400 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label for="borongan-add-reject" class="block text-xs font-medium text-red-400 mb-1">
+            Tambah Reject (+ unit)
+          </label>
+          <input
+            id="borongan-add-reject"
+            type="number"
+            min="0"
+            value="0"
+            class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-lg font-bold text-red-400 focus:outline-none"
+          />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeBoronganModal()"
+            class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-300 cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 cursor-pointer"
+          >
+            Tambahkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 4. JAVASCRIPT LOGIC -->
+  <script>
+    const ROOT_REF_PATH = 'tefa_songsong';
+    const LOCAL_STORAGE_KEY = 'tefa_songsong_v1_data';
+    const SESSION_PORTAL_KEY = 'tefa_portal_session_v1';
+
+    const SCHEDULE_DAYS = [
+      { id: '2026-11-23', short: '23 Nov', day: 'Senin', full: '23 November 2026' },
+      { id: '2026-11-24', short: '24 Nov', day: 'Selasa', full: '24 November 2026' },
+      { id: '2026-11-26', short: '26 Nov', day: 'Kamis', full: '26 November 2026' },
+      { id: '2026-11-27', short: '27 Nov', day: 'Jumat', full: '27 November 2026' },
+    ];
+
+    const COORDINATORS = [
+      { presensi: 4, pin: '1004', name: 'Yuda', role: 'Stok Opname Barang', view: 'stok', isCoordinator: true },
+      { presensi: 5, pin: '1005', name: 'Alba', role: 'Stok Opname Barang', view: 'stok', isCoordinator: true },
+      { presensi: 6, pin: '1006', name: 'Kifah', role: 'Kepala Unit Produksi', view: 'prod-head', isCoordinator: true },
+      { presensi: 7, pin: '1007', name: 'Thalita', role: 'Quality Control', view: 'qc', isCoordinator: true },
+      { presensi: 8, pin: '1008', name: 'Alpan', role: 'Quality Control', view: 'qc', isCoordinator: true },
+      { presensi: 9, pin: '1009', name: 'Putra', role: 'Pengemasan dan Pengiriman', view: 'packing', isCoordinator: true },
+      { presensi: 10, pin: '1010', name: 'Hidan', role: 'Pengemasan dan Pengiriman', view: 'packing', isCoordinator: true },
+      { presensi: 11, pin: '1011', name: 'Isa', role: 'Penanggung Jawab 5R', view: '5r', isCoordinator: true },
+      { presensi: 12, pin: '1012', name: 'Safa', role: 'Penanggung Jawab 5R', view: '5r', isCoordinator: true },
+    ];
+
+    const PRODUCTION_WORKERS = [
+      { index: 0, presensi: 13, name: 'Rhino', pin: '2001' },
+      { index: 1, presensi: 14, name: 'Redi', pin: '2002' },
+      { index: 2, presensi: 15, name: 'Rafa', pin: '2003' },
+      { index: 3, presensi: 16, name: 'Aqim', pin: '2004' },
+      { index: 4, presensi: 17, name: 'Raihan', pin: '2005' },
+      { index: 5, presensi: 18, name: 'Fajar', pin: '2006' },
+      { index: 6, presensi: 19, name: 'Embun', pin: '2007' },
+      { index: 7, presensi: 20, name: 'Nazwa', pin: '2008' },
+      { index: 8, presensi: 21, name: 'Dea', pin: '2009' },
+      { index: 9, presensi: 22, name: 'Alvi', pin: '2010' },
+      { index: 10, presensi: 23, name: 'Ziva', pin: '2011' },
+      { index: 11, presensi: 24, name: 'Cyrilla', pin: '2012' },
+      { index: 12, presensi: 25, name: 'Neysa', pin: '2013' },
+      { index: 13, presensi: 26, name: 'Akmal', pin: '2014' },
+      { index: 14, presensi: 27, name: 'Milo', pin: '2015' },
+      { index: 15, presensi: 28, name: 'Tegar', pin: '2016' },
+      { index: 16, presensi: 29, name: 'Vika', pin: '2017' },
+      { index: 17, presensi: 30, name: 'Aul', pin: '2018' },
+      { index: 18, presensi: 31, name: 'Ilham Daniswara', pin: '2019' },
+      { index: 19, presensi: 32, name: 'Ilham Bayu', pin: '2020' },
+      { index: 20, presensi: 33, name: 'Damar', pin: '2021' },
+      { index: 21, presensi: 34, name: 'Sakti', pin: '2022' },
+      { index: 22, presensi: 35, name: 'Hafidz', pin: '2023' },
+    ];
+
+    const ALL_FIELD_USERS = [
+      ...COORDINATORS,
+      ...PRODUCTION_WORKERS.map((w) => ({
+        presensi: w.presensi,
+        pin: w.pin,
+        name: w.name,
+        role: 'Staf Unit Produksi',
+        view: 'worker',
+        workerIndex: w.index,
+        isCoordinator: false,
+      })),
+    ];
+
+    const FIVE_R_LABELS = ['Ringkas', 'Rapi', 'Resik', 'Rawat', 'Rajin'];
+
+    let isFirebaseConnected = false;
+    let dbRef = null;
+    let activeDateId = SCHEDULE_DAYS[0].id;
+    let activeUser = null;
+    let headFilterMode = 'all';
+    let wakeLockSentinel = null;
+    let lastViolationTimestamp = 0;
+
+    function createDefaultDay() {
+      const workers = {};
+      PRODUCTION_WORKERS.forEach((w) => {
+        workers[String(w.index)] = { lolos: 0, reject: 0 };
+      });
+      return {
+        jamMulai: '07:30',
+        jamSelesai: '15:00',
+        stokAmbil: 0,
+        stokSetor: 0,
+        stokCatatan: '',
+        packingVerified: 0,
+        fiveR: [false, false, false, false, false],
+        catatan5R: '',
+        kasPemasukan: 0,
+        kasPengeluaran: 0,
+        kasKeterangan: '',
+        linkVideo: '',
+        catatanAdmin: '',
+        logPelanggaranTab: [],
+        attendance: {},
+        workers,
+      };
+    }
+
+    function createDefaultDb() {
+      const days = {};
+      SCHEDULE_DAYS.forEach((d) => {
+        days[d.id] = createDefaultDay();
+      });
+      return {
+        meta: {
+          kelas: 'X TE 2',
+          ruang: 'Ruang 84',
+          instruktur: '',
+          targetHarianKelas: 230,
+        },
+        days,
+      };
+    }
+
+    function normalizeDb(raw) {
+      const base = createDefaultDb();
+      if (!raw || typeof raw !== 'object') return base;
+
+      base.meta = {
+        kelas: raw.meta?.kelas ?? 'X TE 2',
+        ruang: raw.meta?.ruang ?? 'Ruang 84',
+        instruktur: raw.meta?.instruktur ?? '',
+        targetHarianKelas: Number(raw.meta?.targetHarianKelas) > 0 ? Number(raw.meta.targetHarianKelas) : 230,
+      };
+
+      SCHEDULE_DAYS.forEach((d) => {
+        const dRaw = raw.days?.[d.id] || {};
+        const dDef = createDefaultDay();
+
+        const fiveR = Array.isArray(dRaw.fiveR)
+          ? [0, 1, 2, 3, 4].map((i) => Boolean(dRaw.fiveR[i]))
+          : dDef.fiveR;
+
+        const workers = { ...dDef.workers };
+        if (dRaw.workers && typeof dRaw.workers === 'object') {
+          PRODUCTION_WORKERS.forEach((w) => {
+            const k = String(w.index);
+            const wObj = dRaw.workers[k] || dRaw.workers[w.index] || {};
+            workers[k] = {
+              ...wObj,
+              lolos: Math.max(0, Number(wObj.lolos) || 0),
+              reject: Math.max(0, Number(wObj.reject) || 0),
+            };
+          });
+        }
+
+        const logs = Array.isArray(dRaw.logPelanggaranTab)
+          ? dRaw.logPelanggaranTab
+          : dRaw.logPelanggaranTab && typeof dRaw.logPelanggaranTab === 'object'
+          ? Object.values(dRaw.logPelanggaranTab)
+          : [];
+
+        base.days[d.id] = {
+          jamMulai: dRaw.jamMulai || '07:30',
+          jamSelesai: dRaw.jamSelesai || '15:00',
+          stokAmbil: Math.max(0, Number(dRaw.stokAmbil) || 0),
+          stokSetor: Math.max(0, Number(dRaw.stokSetor) || 0),
+          stokCatatan: dRaw.stokCatatan || '',
+          packingVerified: Math.max(0, Number(dRaw.packingVerified) || 0),
+          fiveR,
+          catatan5R: dRaw.catatan5R || '',
+          kasPemasukan: Math.max(0, Number(dRaw.kasPemasukan) || 0),
+          kasPengeluaran: Math.max(0, Number(dRaw.kasPengeluaran) || 0),
+          kasKeterangan: dRaw.kasKeterangan || '',
+          linkVideo: dRaw.linkVideo || '',
+          catatanAdmin: dRaw.catatanAdmin || '',
+          logPelanggaranTab: logs,
+          attendance: dRaw.attendance && typeof dRaw.attendance === 'object' ? dRaw.attendance : {},
+          workers,
+        };
+      });
+
+      return base;
+    }
+
+    let dbState = normalizeDb(
+      (() => {
+        try {
+          const s = localStorage.getItem(LOCAL_STORAGE_KEY);
+          return s ? JSON.parse(s) : null;
+        } catch (_) {
+          return null;
+        }
+      })()
+    );
+
+    function isPlaceholderConfig(cfg) {
+      if (!cfg || !cfg.apiKey || !cfg.databaseURL) return true;
+      return (
+        cfg.apiKey.includes('YOUR_') ||
+        cfg.databaseURL.includes('YOUR_') ||
+        cfg.projectId?.includes('YOUR_')
+      );
+    }
+
+    function updateConnectionUI() {
+      const label = isFirebaseConnected ? 'Firebase Live' : 'LocalStorage Mode';
+      const cls = isFirebaseConnected
+        ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-num text-emerald-400 bg-emerald-500/10'
+        : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono-num text-amber-400 bg-amber-500/10';
+      const dot = isFirebaseConnected
+        ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>'
+        : '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>';
+
+      const loginBadge = document.getElementById('login-db-badge');
+      if (loginBadge) {
+        loginBadge.className = cls;
+        loginBadge.innerHTML = `${dot}<span>${label}</span>`;
+      }
+      const headerBadge = document.getElementById('header-db-badge');
+      if (headerBadge) {
+        headerBadge.className = cls;
+        headerBadge.innerHTML = `${dot}<span>${label}</span>`;
+      }
+    }
+
+    function initDatabase() {
+      if (!isPlaceholderConfig(firebaseConfig) && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          dbRef = firebase.database().ref(ROOT_REF_PATH);
+          isFirebaseConnected = true;
+          updateConnectionUI();
+
+          dbRef.on(
+            'value',
+            (snap) => {
+              const val = snap.val();
+              if (val) {
+                dbState = normalizeDb(val);
+                try {
+                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
+                } catch (_) {}
+              } else {
+                dbRef.set(dbState);
+              }
+              if (activeUser) renderPortal();
+            },
+            () => {
+              isFirebaseConnected = false;
+              updateConnectionUI();
+              if (activeUser) renderPortal();
+            }
+          );
+          return;
+        } catch (_) {}
+      }
+
+      isFirebaseConnected = false;
+      updateConnectionUI();
+    }
+
+    function saveDb(toastMsg = null) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
+      } catch (_) {}
+
+      if (isFirebaseConnected && dbRef) {
+        dbRef.set(dbState).catch(() => {});
+      }
+
+      if (toastMsg) showToast(toastMsg);
+      if (activeUser) renderPortal();
+    }
+
+    function populatePersonnelDropdown() {
+      const select = document.getElementById('personnel-select');
+      const coordGroup = document.createElement('optgroup');
+      coordGroup.label = 'A. Koordinator Lapangan (Presensi #4–#12)';
+      COORDINATORS.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c.pin;
+        opt.textContent = `#${c.presensi} ${c.name} — ${c.role}`;
+        coordGroup.appendChild(opt);
+      });
+
+      const staffGroup = document.createElement('optgroup');
+      staffGroup.label = 'B. Staf Unit Produksi (Presensi #13–#35)';
+      PRODUCTION_WORKERS.forEach((w) => {
+        const opt = document.createElement('option');
+        opt.value = w.pin;
+        opt.textContent = `#${w.presensi} ${w.name} — Staf Unit Produksi`;
+        staffGroup.appendChild(opt);
+      });
+
+      select.appendChild(coordGroup);
+      select.appendChild(staffGroup);
+    }
+
+    document.getElementById('field-login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pin = document.getElementById('personnel-select').value;
+      const enteredPin = document.getElementById('field-pin-input').value.trim();
+      const errBox = document.getElementById('field-login-error');
+      const errText = document.getElementById('field-login-error-text');
+
+      if (!pin) {
+        errText.textContent = 'Silakan pilih no. presensi & nama terlebih dahulu.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      const found = ALL_FIELD_USERS.find((u) => u.pin === pin);
+      if (!found || found.pin !== enteredPin) {
+        errText.textContent = 'PIN 4 digit tidak sesuai untuk akun yang dipilih.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      errBox.classList.add('hidden');
+      activeUser = found;
+      sessionStorage.setItem(SESSION_PORTAL_KEY, JSON.stringify({ pin: found.pin }));
+      enterPortal();
+      showToast(`Masuk sebagai #${found.presensi} ${found.name}`);
+    });
+
+    function restorePortalSession() {
+      try {
+        const raw = sessionStorage.getItem(SESSION_PORTAL_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const found = ALL_FIELD_USERS.find((u) => u.pin === parsed?.pin);
+          if (found) {
+            activeUser = found;
+            enterPortal();
+            return;
+          }
+        }
+      } catch (_) {}
+    }
+
+    function enterPortal() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('portal-shell').classList.remove('hidden');
+
+      document.getElementById('header-user-name').textContent = `#${activeUser.presensi} ${activeUser.name}`;
+      document.getElementById('header-user-role').textContent = `${activeUser.role} • PIN ${activeUser.pin}`;
+
+      document.querySelectorAll('.role-view').forEach((el) => el.classList.add('hidden'));
+      const targetView = document.getElementById(`view-${activeUser.view}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      const focusPanel = document.getElementById('coordinator-focus-panel');
+      if (activeUser.isCoordinator) {
+        focusPanel.classList.remove('hidden');
+        requestScreenWakeLock();
+      } else {
+        focusPanel.classList.add('hidden');
+        releaseScreenWakeLock();
+      }
+
+      renderPortal();
+    }
+
+    function logoutPortal() {
+      sessionStorage.removeItem(SESSION_PORTAL_KEY);
+      activeUser = null;
+      releaseScreenWakeLock();
+      document.getElementById('portal-shell').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('field-pin-input').value = '';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function requestScreenWakeLock() {
+      const pill = document.getElementById('wakelock-status-pill');
+      if ('wakeLock' in navigator && navigator.wakeLock?.request) {
+        try {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+          if (pill) {
+            pill.textContent = 'Wake Lock: Aktif';
+            pill.className = 'text-[10px] font-mono-num px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400';
+          }
+          wakeLockSentinel.addEventListener('release', () => {
+            if (pill && activeUser?.isCoordinator) {
+              pill.textContent = 'Wake Lock: Jeda';
+              pill.className = 'text-[10px] font-mono-num px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400';
+            }
+          });
+        } catch (_) {
+          if (pill) pill.textContent = 'Wake Lock: Nonaktif';
+        }
+      } else if (pill) {
+        pill.textContent = 'Wake Lock: Tidak didukung';
+      }
+    }
+
+    async function releaseScreenWakeLock() {
+      if (wakeLockSentinel) {
+        try {
+          await wakeLockSentinel.release();
+        } catch (_) {}
+        wakeLockSentinel = null;
+      }
+    }
+
+    function toggleFullscreenMode() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {
+          showToast('Fullscreen tidak diizinkan browser.');
+        });
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!activeUser || !activeUser.isCoordinator) return;
+
+      if (document.visibilityState === 'hidden') {
+        const now = Date.now();
+        if (now - lastViolationTimestamp < 2000) return;
+        lastViolationTimestamp = now;
+
+        const nowTimeStr = new Date().toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+
+        const dayObj = dbState.days[activeDateId];
+        if (!Array.isArray(dayObj.logPelanggaranTab)) dayObj.logPelanggaranTab = [];
+        dayObj.logPelanggaranTab.push({
+          nama: `#${activeUser.presensi} ${activeUser.name}`,
+          role: activeUser.role,
+          waktu: nowTimeStr,
+          keterangan: 'Keluar dari halaman operasional',
+        });
+        saveDb();
+      } else if (document.visibilityState === 'visible') {
+        requestScreenWakeLock();
+        const dayObj = dbState.days[activeDateId];
+        const hasMyLog = (dayObj.logPelanggaranTab || []).some(
+          (item) => typeof item === 'object' && item.nama === `#${activeUser.presensi} ${activeUser.name}`
+        );
+        if (hasMyLog) {
+          document.getElementById('tab-violation-alert').classList.remove('hidden');
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      }
+    });
+
+    function dismissViolationAlert() {
+      document.getElementById('tab-violation-alert').classList.add('hidden');
+    }
+
+    function getGradeInfo(lolos, reject) {
+      const l = Number(lolos) || 0;
+      const r = Number(reject) || 0;
+
+      if (l === 0 && r === 0) return { label: '-', cls: 'bg-slate-800/70 text-slate-400' };
+      if (l < 10) return { label: 'Tidak KKM', cls: 'bg-red-500/10 text-red-400' };
+      if (l > 10 && r === 0) return { label: '100', cls: 'bg-emerald-500/10 text-emerald-400' };
+      if (l > 10 && r > 0) return { label: '96', cls: 'bg-sky-500/10 text-sky-400' };
+      if (l === 10 && r === 0) return { label: '86', cls: 'bg-teal-500/10 text-teal-300' };
+      return { label: '76', cls: 'bg-amber-500/10 text-amber-300' };
+    }
+
+    function getTotalLolosDay(dayId) {
+      const day = dbState.days[dayId];
+      let total = 0;
+      PRODUCTION_WORKERS.forEach((w) => {
+        total += Number(day.workers?.[String(w.index)]?.lolos) || 0;
+      });
+      return total;
+    }
+
+    function renderPortal() {
+      renderDateTabs();
+      if (!activeUser) return;
+
+      if (activeUser.view === 'qc') renderQCView();
+      if (activeUser.view === 'stok') renderStokView();
+      if (activeUser.view === 'prod-head') renderProdHeadView();
+      if (activeUser.view === 'packing') renderPackingView();
+      if (activeUser.view === '5r') renderFiveRView();
+      if (activeUser.view === 'worker') renderWorkerView();
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderDateTabs() {
+      const container = document.getElementById('field-date-tabs');
+      container.innerHTML = SCHEDULE_DAYS.map((d) => {
+        const active = d.id === activeDateId;
+        return `
+          <button
+            type="button"
+            onclick="selectFieldDate('${d.id}')"
+            class="p-2.5 rounded-xl border text-left transition cursor-pointer ${
+              active
+                ? 'bg-emerald-500/10 border-emerald-500/50 text-white'
+                : 'bg-[#0B0F17] border-slate-800/70 text-slate-400 hover:border-slate-700'
+            }"
+          >
+            <div class="text-[10px] font-semibold ${active ? 'text-emerald-400' : 'text-slate-500'}">${d.day}</div>
+            <div class="text-xs sm:text-sm font-mono-num font-bold mt-0.5">${d.short}</div>
+          </button>
+        `;
+      }).join('');
+
+      const activeObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
+      document.getElementById('field-active-date-label').textContent = `${activeObj.day}, ${activeObj.full}`;
+      document.getElementById('field-meta-kelas').textContent = dbState.meta.kelas;
+      document.getElementById('field-meta-ruang').textContent = dbState.meta.ruang;
+      document.getElementById('field-meta-target').textContent = `${dbState.meta.targetHarianKelas} pcs`;
+    }
+
+    function selectFieldDate(dateId) {
+      activeDateId = dateId;
+      renderPortal();
+    }
+
+    function updateDayValue(field, value) {
+      dbState.days[activeDateId][field] = value;
+      saveDb('Data tersimpan');
+    }
+
+    function renderQCView() {
+      const day = dbState.days[activeDateId];
+      const q = (document.getElementById('qc-search-input')?.value || '').trim().toLowerCase();
+      const grid = document.getElementById('qc-workers-grid');
+
+      const list = PRODUCTION_WORKERS.filter(
+        (w) => !q || w.name.toLowerCase().includes(q) || String(w.presensi).includes(q)
+      );
+
+      grid.innerHTML = list
+        .map((w) => {
+          const data = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+          const lolos = Number(data.lolos) || 0;
+          const reject = Number(data.reject) || 0;
+          const grade = getGradeInfo(lolos, reject);
+
+          return `
+            <div class="rounded-2xl bg-[#0B0F17] border border-slate-800/70 p-4 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="px-2 h-7 rounded-lg bg-[#111622] border border-slate-800 flex items-center justify-center font-mono-num text-xs font-semibold text-emerald-400">
+                    #${w.presensi}
+                  </span>
+                  <div>
+                    <div class="text-sm font-bold text-white">${w.name}</div>
+                    <div class="text-[11px] font-mono-num text-slate-500">Presensi #${w.presensi}</div>
+                  </div>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-md text-xs font-mono-num font-semibold ${grade.cls}">
+                  Nilai: ${grade.label}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5 text-center">
+                <div class="p-2.5 rounded-xl bg-[#111622]">
+                  <div class="text-[10px] text-slate-400">Lolos QC</div>
+                  <div class="text-xl font-mono-num font-bold text-emerald-400">${lolos}</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[#111622]">
+                  <div class="text-[10px] text-slate-400">Reject</div>
+                  <div class="text-xl font-mono-num font-bold text-red-400">${reject}</div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'lolos', 1)"
+                  class="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs cursor-pointer transition"
+                >
+                  +1 Lolos
+                </button>
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'lolos', -1)"
+                  class="py-2 px-2.5 rounded-xl bg-[#111622] hover:bg-slate-800 text-slate-400 font-mono-num text-xs border border-slate-800 cursor-pointer"
+                >
+                  -1
+                </button>
+
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'reject', 1)"
+                  class="flex-1 py-2 px-3 rounded-xl bg-red-500/90 hover:bg-red-500 text-white font-semibold text-xs cursor-pointer transition"
+                >
+                  +1 Rej
+                </button>
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'reject', -1)"
+                  class="py-2 px-2.5 rounded-xl bg-[#111622] hover:bg-slate-800 text-slate-400 font-mono-num text-xs border border-slate-800 cursor-pointer"
+                >
+                  -1
+                </button>
+
+                <button
+                  type="button"
+                  onclick="openBoronganModal(${w.index})"
+                  class="w-full py-1.5 px-3 rounded-xl bg-[#111622] hover:bg-slate-800/80 text-sky-400 border border-slate-800 font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer mt-0.5"
+                >
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                  <span>Input Borongan</span>
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function adjustQC(workerIdx, type, delta) {
+      const key = String(workerIdx);
+      const curr = dbState.days[activeDateId].workers[key] || { lolos: 0, reject: 0 };
+      const nextVal = Math.max(0, (Number(curr[type]) || 0) + delta);
+      dbState.days[activeDateId].workers[key] = { ...curr, [type]: nextVal };
+      saveDb(`QC #${PRODUCTION_WORKERS[workerIdx].presensi} ${PRODUCTION_WORKERS[workerIdx].name} diperbarui`);
+    }
+
+    function openBoronganModal(workerIdx) {
+      const w = PRODUCTION_WORKERS[workerIdx];
+      document.getElementById('borongan-worker-index').value = workerIdx;
+      document.getElementById('borongan-worker-title').textContent = `#${w.presensi} ${w.name}`;
+      document.getElementById('borongan-add-lolos').value = 0;
+      document.getElementById('borongan-add-reject').value = 0;
+
+      const modal = document.getElementById('borongan-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeBoronganModal() {
+      const modal = document.getElementById('borongan-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('borongan-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idx = Number(document.getElementById('borongan-worker-index').value);
+      const addLolos = Math.max(0, Number(document.getElementById('borongan-add-lolos').value) || 0);
+      const addReject = Math.max(0, Number(document.getElementById('borongan-add-reject').value) || 0);
+
+      const key = String(idx);
+      const curr = dbState.days[activeDateId].workers[key] || { lolos: 0, reject: 0 };
+      dbState.days[activeDateId].workers[key] = {
+        ...curr,
+        lolos: (Number(curr.lolos) || 0) + addLolos,
+        reject: (Number(curr.reject) || 0) + addReject,
+      };
+      closeBoronganModal();
+      saveDb(`Borongan +${addLolos} lolos, +${addReject} reject`);
+    });
+
+    function renderStokView() {
+      const day = dbState.days[activeDateId];
+      const totalLolos = getTotalLolosDay(activeDateId);
+      const stokAmbil = Number(day.stokAmbil) || 0;
+      const selisih = stokAmbil - totalLolos;
+
+      document.getElementById('stok-ambil-field').value = stokAmbil;
+      document.getElementById('stok-setor-field').value = Number(day.stokSetor) || 0;
+      document.getElementById('stok-catatan-field').value = day.stokCatatan || '';
+      document.getElementById('stok-total-lolos-display').textContent = `${totalLolos} pcs`;
+
+      const selEl = document.getElementById('stok-selisih-field-display');
+      selEl.textContent = `${selisih > 0 ? '+' : ''}${selisih}`;
+      selEl.className = `text-xl font-bold font-mono-num mt-1 ${
+        selisih < 0 ? 'text-red-400' : selisih > 0 ? 'text-amber-400' : 'text-emerald-400'
+      }`;
+    }
+
+    function setHeadFilter(mode) {
+      headFilterMode = mode;
+      ['all', 'below', 'met'].forEach((m) => {
+        const btn = document.getElementById(`head-filter-${m}`);
+        if (!btn) return;
+        if (m === mode) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500 text-slate-950 cursor-pointer';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-medium bg-[#0B0F17] text-slate-400 border border-slate-800 cursor-pointer';
+        }
+      });
+      renderProdHeadView();
+    }
+
+    function renderProdHeadView() {
+      const day = dbState.days[activeDateId];
+      document.getElementById('head-jam-mulai').value = day.jamMulai || '07:30';
+      document.getElementById('head-jam-selesai').value = day.jamSelesai || '15:00';
+
+      const listEl = document.getElementById('head-workers-list');
+      const items = PRODUCTION_WORKERS.filter((w) => {
+        const lolos = Number(day.workers?.[String(w.index)]?.lolos) || 0;
+        if (headFilterMode === 'below') return lolos < 10;
+        if (headFilterMode === 'met') return lolos >= 10;
+        return true;
+      });
+
+      listEl.innerHTML = items
+        .map((w) => {
+          const data = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+          const lolos = Number(data.lolos) || 0;
+          const reject = Number(data.reject) || 0;
+          const isKkm = lolos >= 10;
+
+          return `
+            <div class="p-3.5 rounded-xl bg-[#0B0F17] border ${
+              isKkm ? 'border-emerald-500/30' : 'border-slate-800/70'
+            } flex items-center justify-between">
+              <div>
+                <div class="text-xs sm:text-sm font-semibold text-white">#${w.presensi} ${w.name}</div>
+                <div class="text-[11px] font-mono-num ${isKkm ? 'text-emerald-400' : 'text-slate-500'}">
+                  ${isKkm ? 'Target 10 pcs Tercapai' : 'Belum Target (<10 pcs)'}
+                </div>
+              </div>
+              <div class="text-right font-mono-num">
+                <div class="text-sm font-bold text-emerald-400">${lolos} <span class="text-[10px] text-slate-500">lolos</span></div>
+                <div class="text-xs text-red-400">${reject} <span class="text-[10px] text-slate-500">rej</span></div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderPackingView() {
+      const day = dbState.days[activeDateId];
+      const totalLolos = getTotalLolosDay(activeDateId);
+      const ikatRec = Math.floor(totalLolos / 5);
+      const sisaPcs = totalLolos % 5;
+
+      document.getElementById('pack-total-lolos').textContent = `${totalLolos} pcs`;
+      document.getElementById('pack-calc-ikat').textContent = `${ikatRec} Ikat`;
+      document.getElementById('pack-calc-sisa').textContent = `Sisa: ${sisaPcs} pcs`;
+      document.getElementById('pack-verified-input').value = Number(day.packingVerified) || 0;
+    }
+
+    function renderFiveRView() {
+      const day = dbState.days[activeDateId];
+      const arr = Array.isArray(day.fiveR) ? day.fiveR : [false, false, false, false, false];
+      const container = document.getElementById('field-5r-cards');
+
+      container.innerHTML = FIVE_R_LABELS.map((label, idx) => {
+        const checked = Boolean(arr[idx]);
+        return `
+          <button
+            type="button"
+            onclick="toggleFieldFiveR(${idx})"
+            class="p-3.5 rounded-xl border text-center transition cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+              checked
+                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300'
+                : 'bg-[#0B0F17] border-slate-800/70 text-slate-400 hover:border-slate-700'
+            }"
+          >
+            <i data-lucide="${checked ? 'check-square' : 'square'}" class="w-5 h-5 ${
+              checked ? 'text-emerald-400' : 'text-slate-600'
+            }"></i>
+            <span class="text-xs font-semibold">${label}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('field-5r-note').value = day.catatan5R || '';
+    }
+
+    function toggleFieldFiveR(idx) {
+      const arr = [...(dbState.days[activeDateId].fiveR || [false, false, false, false, false])];
+      arr[idx] = !arr[idx];
+      dbState.days[activeDateId].fiveR = arr;
+      saveDb(`5R ${FIVE_R_LABELS[idx]} diperbarui`);
+    }
+
+    function renderWorkerView() {
+      const day = dbState.days[activeDateId];
+      const wIdx = activeUser.workerIndex ?? 0;
+      const wData = day.workers?.[String(wIdx)] || { lolos: 0, reject: 0 };
+      const lolos = Number(wData.lolos) || 0;
+      const reject = Number(wData.reject) || 0;
+
+      document.getElementById('worker-card-name').textContent = `#${activeUser.presensi} ${activeUser.name}`;
+      document.getElementById('worker-stat-lolos').textContent = lolos;
+      document.getElementById('worker-stat-reject').textContent = reject;
+      document.getElementById('worker-stat-prod').textContent = ((lolos / 15) * 100).toFixed(1) + '%';
+
+      const grade = getGradeInfo(lolos, reject);
+      const badgeEl = document.getElementById('worker-grade-badge');
+      badgeEl.textContent = grade.label;
+      badgeEl.className = `inline-block mt-1 px-3 py-1 rounded-lg text-sm font-mono-num font-bold ${grade.cls}`;
+
+      const alertEl = document.getElementById('worker-reject-alert');
+      if (reject > 0) alertEl.classList.remove('hidden');
+      else alertEl.classList.add('hidden');
+
+      const pctBar = Math.min(100, Math.round((lolos / 15) * 100));
+      const barEl = document.getElementById('worker-progress-bar');
+      const msgEl = document.getElementById('worker-cheer-message');
+      document.getElementById('worker-progress-label').textContent = `${lolos} / 10 pcs`;
+
+      barEl.style.width = `${pctBar}%`;
+
+      if (lolos < 10) {
+        barEl.className = 'h-full rounded-full transition-all duration-300 bg-amber-400';
+        msgEl.className = 'text-xs font-medium text-amber-300';
+        msgEl.textContent = 'Target 10 pcs per anggota belum tercapai (KKM = 76).';
+      } else if (lolos === 10 && reject === 0) {
+        barEl.className = 'h-full rounded-full transition-all duration-300 bg-teal-400';
+        msgEl.className = 'text-xs font-medium text-teal-300';
+        msgEl.textContent = 'Sesuai target tanpa reject (Nilai 86).';
+      } else if (lolos > 10 && reject === 0) {
+        barEl.className = 'h-full rounded-full transition-all duration-300 bg-emerald-500';
+        msgEl.className = 'text-xs font-medium text-emerald-300';
+        msgEl.textContent = 'Melebihi target tanpa reject (Nilai 100).';
+      } else {
+        barEl.className = 'h-full rounded-full transition-all duration-300 bg-sky-400';
+        msgEl.className = 'text-xs font-medium text-sky-300';
+        msgEl.textContent = 'Target tercapai; selesaikan revisi unit reject.';
+      }
+
+      const totalClassLolos = getTotalLolosDay(activeDateId);
+      const targetKelas = Number(dbState.meta.targetHarianKelas) || 230;
+      const classPct = Math.min(100, Math.round((totalClassLolos / targetKelas) * 100));
+      document.getElementById('class-target-pct-text').textContent = `${classPct}%`;
+      document.getElementById('class-target-bar').style.width = `${classPct}%`;
+      document.getElementById('class-target-achieved').textContent = `${totalClassLolos} pcs`;
+      document.getElementById('class-target-goal').textContent = `${targetKelas} pcs`;
+
+      const ranked = PRODUCTION_WORKERS.map((w) => ({
+        ...w,
+        lolos: Number(day.workers?.[String(w.index)]?.lolos) || 0,
+      }))
+        .sort((a, b) => b.lolos - a.lolos || a.index - b.index)
+        .slice(0, 3);
+
+      const medals = ['#1', '#2', '#3'];
+      document.getElementById('worker-podium-list').innerHTML = ranked
+        .map(
+          (item, i) => `
+          <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-[#0B0F17] text-xs">
+            <div class="flex items-center gap-2">
+              <span class="font-mono-num font-bold text-amber-400">${medals[i]}</span>
+              <span class="font-medium text-white">#${item.presensi} ${item.name}</span>
+            </div>
+            <span class="font-mono-num font-semibold text-emerald-400">${item.lolos} pcs</span>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className =
+        'px-3.5 py-2 rounded-xl bg-[#111622] border border-slate-800 text-xs font-medium text-emerald-400 shadow-lg flex items-center gap-2 transition-all duration-300';
+      el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${msg}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(6px)';
+        setTimeout(() => el.remove(), 300);
+      }, 2000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populatePersonnelDropdown();
+      updateConnectionUI();
+      initDatabase();
+      restorePortalSession();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEFA Andon Board Proyektor — SMK Negeri 3 Yogyakarta (Kelas X TE 2)</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Firebase JS SDK v10 Compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+  <style>
+    body {
+      background-color: #0B0F17;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    @keyframes subtlePulseBorder {
+      0% {
+        border-color: rgba(16, 185, 129, 0.9);
+        background-color: rgba(16, 185, 129, 0.06);
+      }
+      100% {
+        border-color: rgba(30, 41, 59, 0.8);
+        background-color: #111622;
+      }
+    }
+    .hero-flash-active {
+      animation: subtlePulseBorder 1.4s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0B0F17] text-slate-200 antialiased flex flex-col justify-between overflow-x-hidden">
+
+  <!-- FIREBASE CONFIGURATION -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAz5XgzNnll5ON_C7sTIZT9iRuzHL_63w",
+      authDomain: "tefa-aa841.firebaseapp.com",
+      databaseURL: "https://tefa-aa841-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tefa-aa841",
+      storageBucket: "tefa-aa841.firebasestorage.app",
+      messagingSenderId: "645319588053",
+      appId: "1:645319588053:web:0e237892078ad3e9380a5c",
+      measurementId: "G-DMTB0V43J9"
+    };
+  </script>
+
+  <!-- 1. HEADER ATAS MINIMALIS -->
+  <header class="border-b border-slate-800/70 bg-[#0B0F17]/95 px-4 lg:px-8 py-3">
+    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="inline-flex items-center gap-2 text-xs font-mono-num font-semibold text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          TEFA SMKN 3 YOGYAKARTA
+        </span>
+        <span id="header-kelas-ruang" class="text-xs font-mono-num text-slate-300 bg-[#111622] px-2.5 py-1 rounded-lg border border-slate-800/70">
+          X TE 2 • Ruang 84
+        </span>
+        <span class="text-xs text-slate-500 hidden sm:inline">
+          PT YPTI • Songsong Helm Latih
+        </span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1 bg-[#111622] p-1 rounded-xl border border-slate-800/70" id="projector-date-buttons"></div>
+
+        <div class="flex items-center gap-1 bg-[#111622] p-1 rounded-xl border border-slate-800/70">
+          <button
+            id="mode-daily-btn"
+            type="button"
+            onclick="setDisplayMode('daily')"
+            class="px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-emerald-500 text-slate-950"
+          >
+            Harian
+          </button>
+          <button
+            id="mode-cumulative-btn"
+            type="button"
+            onclick="setDisplayMode('cumulative')"
+            class="px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer text-slate-400 hover:text-white"
+          >
+            Kumulatif 4 Hari
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <div id="live-clock" class="px-3 py-1 rounded-xl bg-[#111622] border border-slate-800/70 font-mono-num text-sm font-semibold text-white">
+          00:00:00
+        </div>
+
+        <span id="conn-status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-num text-amber-400 bg-amber-500/10">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          <span>LOCAL MODE</span>
+        </span>
+
+        <button
+          type="button"
+          onclick="toggleFullscreen()"
+          title="Fullscreen"
+          class="p-2 rounded-xl bg-[#111622] hover:bg-slate-800 text-slate-300 border border-slate-800/70 transition cursor-pointer"
+        >
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. AREA UTAMA LAYAR PROYEKTOR -->
+  <main class="flex-1 max-w-[1800px] w-full mx-auto px-4 lg:px-8 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+    <!-- KOLOM KIRI (7 KOLOM) -->
+    <section class="lg:col-span-7 flex flex-col justify-between gap-5">
+      <div
+        id="hero-lolos-card"
+        class="flex-1 rounded-3xl bg-[#111622] border border-slate-800/80 p-6 lg:p-10 flex flex-col justify-between transition-all"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h1 class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-emerald-400">
+            Total Produk Lolos QC
+          </h1>
+
+          <div class="flex items-center gap-2">
+            <span id="delta-lolos-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-mono-num font-bold bg-emerald-500 text-slate-950">
+              +1 UNIT LOLOS
+            </span>
+            <span id="scope-label-badge" class="px-3 py-1 rounded-full text-xs font-mono-num text-slate-400 bg-[#0B0F17]">
+              23 NOVEMBER 2026
+            </span>
+          </div>
+        </div>
+
+        <div class="my-6 flex items-baseline justify-center gap-4">
+          <div
+            id="hero-lolos-number"
+            class="font-mono-num font-extrabold tracking-tight text-white text-8xl sm:text-9xl xl:text-[10.5rem] leading-none select-none"
+          >
+            0
+          </div>
+          <span class="text-2xl sm:text-3xl font-mono-num font-semibold text-emerald-400">
+            pcs
+          </span>
+        </div>
+
+        <div class="space-y-2.5 pt-4 border-t border-slate-800/60">
+          <div class="flex items-center justify-between text-xs sm:text-sm font-mono-num">
+            <span id="target-progress-title" class="text-slate-400">Capaian Target Harian</span>
+            <span id="target-progress-stats" class="font-semibold text-emerald-400">0 / 230 pcs (0%)</span>
+          </div>
+          <div class="w-full h-3 rounded-full bg-[#0B0F17] overflow-hidden">
+            <div
+              id="target-progress-bar"
+              class="h-full bg-emerald-500 transition-all duration-500"
+              style="width: 0%;"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Total Reject</span>
+            <i data-lucide="x-circle" class="w-4 h-4 text-red-400/80"></i>
+          </div>
+          <div id="kpi-reject-val" class="text-3xl font-mono-num font-bold text-red-400 mt-2">0</div>
+          <div id="kpi-reject-ratio" class="text-xs font-mono-num text-slate-500 mt-1">Rasio: 0.0%</div>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Dikemas (@5 pcs)</span>
+            <i data-lucide="package" class="w-4 h-4 text-sky-400/80"></i>
+          </div>
+          <div id="kpi-packing-ikat" class="text-3xl font-mono-num font-bold text-sky-400 mt-2">0 Ikat</div>
+          <div id="kpi-packing-sisa" class="text-xs font-mono-num text-slate-500 mt-1">Sisa: 0 pcs</div>
+        </div>
+
+        <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Kehadiran Tim</span>
+            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+          </div>
+          <div id="kpi-attendance-val" class="text-3xl font-mono-num font-bold text-white mt-2">0 / 35</div>
+          <div class="text-xs text-slate-500 mt-1">Presensi #1–#35</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KOLOM KANAN (5 KOLOM) -->
+    <section class="lg:col-span-5 flex flex-col justify-between gap-5">
+
+      <div class="flex-1 rounded-3xl bg-[#111622] border border-slate-800/80 p-6 flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+            <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+            <span>Top 3 Pekerja Tercepat</span>
+          </h2>
+          <span class="text-xs font-mono-num text-slate-500">Target 10 pcs</span>
+        </div>
+
+        <div id="top3-podium-container" class="space-y-3 my-auto"></div>
+      </div>
+
+      <div class="rounded-3xl bg-[#111622] border border-slate-800/80 p-6">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
+            <span>Perlu Revisi (Reject)</span>
+          </h2>
+          <span id="reject-board-count" class="text-xs font-mono-num text-slate-400">0 Pekerja</span>
+        </div>
+
+        <div id="reject-board-content" class="min-h-[64px] flex flex-wrap items-center gap-2"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 3. JAVASCRIPT LOGIC -->
+  <script>
+    const ROOT_REF_PATH = 'tefa_songsong';
+    const LOCAL_STORAGE_KEY = 'tefa_songsong_v1_data';
+
+    const SCHEDULE_DAYS = [
+      { id: '2026-11-23', short: '23 Nov', full: '23 NOVEMBER 2026' },
+      { id: '2026-11-24', short: '24 Nov', full: '24 NOVEMBER 2026' },
+      { id: '2026-11-26', short: '26 Nov', full: '26 NOVEMBER 2026' },
+      { id: '2026-11-27', short: '27 Nov', full: '27 NOVEMBER 2026' },
+    ];
+
+    const ALL_35_PINS = [
+      '1001', '1002', '1003', '1004', '1005', '1006',
+      '1007', '1008', '1009', '1010', '1011', '1012',
+      '2001', '2002', '2003', '2004', '2005', '2006',
+      '2007', '2008', '2009', '2010', '2011', '2012',
+      '2013', '2014', '2015', '2016', '2017', '2018',
+      '2019', '2020', '2021', '2022', '2023',
+    ];
+
+    const WORKERS_MASTER = [
+      { index: 0, presensi: 13, name: 'Rhino', pin: '2001' },
+      { index: 1, presensi: 14, name: 'Redi', pin: '2002' },
+      { index: 2, presensi: 15, name: 'Rafa', pin: '2003' },
+      { index: 3, presensi: 16, name: 'Aqim', pin: '2004' },
+      { index: 4, presensi: 17, name: 'Raihan', pin: '2005' },
+      { index: 5, presensi: 18, name: 'Fajar', pin: '2006' },
+      { index: 6, presensi: 19, name: 'Embun', pin: '2007' },
+      { index: 7, presensi: 20, name: 'Nazwa', pin: '2008' },
+      { index: 8, presensi: 21, name: 'Dea', pin: '2009' },
+      { index: 9, presensi: 22, name: 'Alvi', pin: '2010' },
+      { index: 10, presensi: 23, name: 'Ziva', pin: '2011' },
+      { index: 11, presensi: 24, name: 'Cyrilla', pin: '2012' },
+      { index: 12, presensi: 25, name: 'Neysa', pin: '2013' },
+      { index: 13, presensi: 26, name: 'Akmal', pin: '2014' },
+      { index: 14, presensi: 27, name: 'Milo', pin: '2015' },
+      { index: 15, presensi: 28, name: 'Tegar', pin: '2016' },
+      { index: 16, presensi: 29, name: 'Vika', pin: '2017' },
+      { index: 17, presensi: 30, name: 'Aul', pin: '2018' },
+      { index: 18, presensi: 31, name: 'Ilham Daniswara', pin: '2019' },
+      { index: 19, presensi: 32, name: 'Ilham Bayu', pin: '2020' },
+      { index: 20, presensi: 33, name: 'Damar', pin: '2021' },
+      { index: 21, presensi: 34, name: 'Sakti', pin: '2022' },
+      { index: 22, presensi: 35, name: 'Hafidz', pin: '2023' },
+    ];
+
+    let isFirebaseLive = false;
+    let activeDateId = SCHEDULE_DAYS[0].id;
+    let displayMode = 'daily';
+    let prevHeroLolos = null;
+    let flashTimeout = null;
+    let wakeLock = null;
+
+    function createDefaultDay() {
+      const workers = {};
+      WORKERS_MASTER.forEach((w) => {
+        workers[String(w.index)] = { lolos: 0, reject: 0 };
+      });
+      const attendance = {};
+      ALL_35_PINS.forEach((pin) => {
+        attendance[pin] = 'Hadir';
+      });
+      return {
+        jamMulai: '07:30',
+        jamSelesai: '15:00',
+        packingVerified: 0,
+        attendance,
+        workers,
+      };
+    }
+
+    function createDefaultState() {
+      const days = {};
+      SCHEDULE_DAYS.forEach((d) => {
+        days[d.id] = createDefaultDay();
+      });
+      return {
+        meta: {
+          kelas: 'X TE 2',
+          ruang: 'Ruang 84',
+          targetHarianKelas: 230,
+        },
+        days,
+      };
+    }
+
+    function normalizeState(raw) {
+      const base = createDefaultState();
+      if (!raw || typeof raw !== 'object') return base;
+
+      base.meta = {
+        kelas: raw.meta?.kelas || 'X TE 2',
+        ruang: raw.meta?.ruang || 'Ruang 84',
+        targetHarianKelas: Number(raw.meta?.targetHarianKelas) > 0 ? Number(raw.meta.targetHarianKelas) : 230,
+      };
+
+      SCHEDULE_DAYS.forEach((d) => {
+        const dRaw = raw.days?.[d.id] || {};
+        const dDef = createDefaultDay();
+
+        const attendance = { ...dDef.attendance };
+        if (dRaw.attendance && typeof dRaw.attendance === 'object') {
+          Object.keys(attendance).forEach((pin) => {
+            if (dRaw.attendance[pin]) attendance[pin] = dRaw.attendance[pin];
+          });
+        }
+
+        const workers = { ...dDef.workers };
+        if (dRaw.workers && typeof dRaw.workers === 'object') {
+          WORKERS_MASTER.forEach((w) => {
+            const k = String(w.index);
+            const entry =
+              dRaw.workers[k] ||
+              dRaw.workers[w.index] ||
+              dRaw.workers[w.pin] ||
+              dRaw.workers[w.name] ||
+              {};
+            workers[k] = {
+              lolos: Math.max(0, Number(entry.lolos) || 0),
+              reject: Math.max(0, Number(entry.reject) || 0),
+            };
+          });
+        }
+
+        base.days[d.id] = {
+          jamMulai: dRaw.jamMulai || '07:30',
+          jamSelesai: dRaw.jamSelesai || '15:00',
+          packingVerified: Math.max(0, Number(dRaw.packingVerified) || 0),
+          attendance,
+          workers,
+        };
+      });
+
+      return base;
+    }
+
+    let boardState = normalizeState(
+      (() => {
+        try {
+          const s = localStorage.getItem(LOCAL_STORAGE_KEY);
+          return s ? JSON.parse(s) : null;
+        } catch (_) {
+          return null;
+        }
+      })()
+    );
+
+    function isPlaceholderConfig(cfg) {
+      if (!cfg || !cfg.apiKey || !cfg.databaseURL) return true;
+      return (
+        cfg.apiKey.includes('YOUR_') ||
+        cfg.databaseURL.includes('YOUR_') ||
+        cfg.projectId?.includes('YOUR_')
+      );
+    }
+
+    function updateConnectionBadge() {
+      const badge = document.getElementById('conn-status-badge');
+      if (!badge) return;
+      if (isFirebaseLive) {
+        badge.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-num text-emerald-400 bg-emerald-500/10';
+        badge.innerHTML =
+          '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>LIVE FIREBASE</span>';
+      } else {
+        badge.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-num text-amber-400 bg-amber-500/10';
+        badge.innerHTML =
+          '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>LOCAL MODE</span>';
+      }
+    }
+
+    function initRealtimeBoard() {
+      if (!isPlaceholderConfig(firebaseConfig) && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          const ref = firebase.database().ref(ROOT_REF_PATH);
+          isFirebaseLive = true;
+          updateConnectionBadge();
+
+          ref.on(
+            'value',
+            (snapshot) => {
+              const val = snapshot.val();
+              if (val) {
+                boardState = normalizeState(val);
+                try {
+                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(boardState));
+                } catch (_) {}
+              }
+              renderBoard();
+            },
+            () => {
+              isFirebaseLive = false;
+              updateConnectionBadge();
+              renderBoard();
+            }
+          );
+          return;
+        } catch (_) {}
+      }
+
+      isFirebaseLive = false;
+      updateConnectionBadge();
+      renderBoard();
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === LOCAL_STORAGE_KEY && e.newValue) {
+        try {
+          boardState = normalizeState(JSON.parse(e.newValue));
+          renderBoard();
+        } catch (_) {}
+      }
+    });
+
+    function extractWorkerRawEntry(workersObj, worker) {
+      if (!workersObj || typeof workersObj !== 'object') return { lolos: 0, reject: 0 };
+      const entry =
+        workersObj[String(worker.index)] ||
+        workersObj[worker.index] ||
+        workersObj[worker.pin] ||
+        workersObj[worker.name] ||
+        {};
+      return {
+        lolos: Math.max(0, Number(entry.lolos) || 0),
+        reject: Math.max(0, Number(entry.reject) || 0),
+      };
+    }
+
+    function getAggregatedData() {
+      const targetDaily = Number(boardState.meta.targetHarianKelas) || 230;
+
+      if (displayMode === 'daily') {
+        const day = boardState.days[activeDateId] || createDefaultDay();
+        let totalLolos = 0;
+        let totalReject = 0;
+
+        const workerStats = WORKERS_MASTER.map((w) => {
+          const raw = extractWorkerRawEntry(day.workers, w);
+          totalLolos += raw.lolos;
+          totalReject += raw.reject;
+          return { ...w, lolos: raw.lolos, reject: raw.reject };
+        });
+
+        let hadirCount = 0;
+        ALL_35_PINS.forEach((pin) => {
+          if ((day.attendance?.[pin] || 'Hadir') === 'Hadir') hadirCount += 1;
+        });
+
+        const activeDayObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
+
+        return {
+          scopeText: activeDayObj.full,
+          progressTitle: 'Capaian Target Harian',
+          targetGoal: targetDaily,
+          totalLolos,
+          totalReject,
+          hadirCount,
+          workerStats,
+        };
+      }
+
+      let totalLolos = 0;
+      let totalReject = 0;
+      const accMap = WORKERS_MASTER.map((w) => ({ ...w, lolos: 0, reject: 0 }));
+
+      let hadirSum = 0;
+      SCHEDULE_DAYS.forEach((d) => {
+        const day = boardState.days[d.id] || createDefaultDay();
+        WORKERS_MASTER.forEach((w, idx) => {
+          const raw = extractWorkerRawEntry(day.workers, w);
+          accMap[idx].lolos += raw.lolos;
+          accMap[idx].reject += raw.reject;
+          totalLolos += raw.lolos;
+          totalReject += raw.reject;
+        });
+        ALL_35_PINS.forEach((pin) => {
+          if ((day.attendance?.[pin] || 'Hadir') === 'Hadir') hadirSum += 1;
+        });
+      });
+
+      const avgHadir = Math.round(hadirSum / SCHEDULE_DAYS.length);
+
+      return {
+        scopeText: 'KUMULATIF 4 HARI KERJA',
+        progressTitle: 'Capaian Target Kumulatif 4 Hari',
+        targetGoal: targetDaily * 4,
+        totalLolos,
+        totalReject,
+        hadirCount: avgHadir,
+        workerStats: accMap,
+      };
+    }
+
+    function getKonversiNilai(lolos, reject) {
+      const l = Number(lolos) || 0;
+      const r = Number(reject) || 0;
+
+      if (l < 10) return { label: 'Tidak KKM', cls: 'bg-[#0B0F17] text-slate-400' };
+      if (l > 10 && r === 0) return { label: '100', cls: 'bg-emerald-500/10 text-emerald-400' };
+      if (l > 10 && r > 0) return { label: '96', cls: 'bg-sky-500/10 text-sky-400' };
+      if (l === 10 && r === 0) return { label: '86', cls: 'bg-teal-500/10 text-teal-300' };
+      return { label: '76', cls: 'bg-amber-500/10 text-amber-300' };
+    }
+
+    function renderBoard() {
+      document.getElementById('header-kelas-ruang').textContent =
+        `${boardState.meta.kelas} • ${boardState.meta.ruang}`;
+
+      document.getElementById('projector-date-buttons').innerHTML = SCHEDULE_DAYS.map((d) => {
+        const active = d.id === activeDateId && displayMode === 'daily';
+        return `
+          <button
+            type="button"
+            onclick="selectProjectorDate('${d.id}')"
+            class="px-2.5 py-1 rounded-lg text-xs font-mono-num font-semibold transition cursor-pointer ${
+              active ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }"
+          >
+            ${d.short}
+          </button>
+        `;
+      }).join('');
+
+      const dailyBtn = document.getElementById('mode-daily-btn');
+      const cumBtn = document.getElementById('mode-cumulative-btn');
+      if (displayMode === 'daily') {
+        dailyBtn.className = 'px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-emerald-500 text-slate-950';
+        cumBtn.className = 'px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer text-slate-400 hover:text-white';
+      } else {
+        cumBtn.className = 'px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-emerald-500 text-slate-950';
+        dailyBtn.className = 'px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer text-slate-400 hover:text-white';
+      }
+
+      const agg = getAggregatedData();
+
+      const heroNumEl = document.getElementById('hero-lolos-number');
+      const heroCardEl = document.getElementById('hero-lolos-card');
+      const deltaBadge = document.getElementById('delta-lolos-badge');
+
+      if (prevHeroLolos !== null && agg.totalLolos > prevHeroLolos) {
+        const diff = agg.totalLolos - prevHeroLolos;
+        deltaBadge.textContent = `+${diff} UNIT LOLOS`;
+        deltaBadge.classList.remove('hidden');
+
+        heroCardEl.classList.remove('hero-flash-active');
+        void heroCardEl.offsetWidth;
+        heroCardEl.classList.add('hero-flash-active');
+
+        if (flashTimeout) clearTimeout(flashTimeout);
+        flashTimeout = setTimeout(() => {
+          deltaBadge.classList.add('hidden');
+          heroCardEl.classList.remove('hero-flash-active');
+        }, 1400);
+      }
+      prevHeroLolos = agg.totalLolos;
+
+      heroNumEl.textContent = agg.totalLolos;
+      document.getElementById('scope-label-badge').textContent = agg.scopeText;
+
+      const pctTarget = agg.targetGoal > 0 ? Math.round((agg.totalLolos / agg.targetGoal) * 100) : 0;
+      const barWidth = Math.min(100, pctTarget);
+      document.getElementById('target-progress-title').textContent = agg.progressTitle;
+      document.getElementById('target-progress-stats').textContent =
+        `${agg.totalLolos} / ${agg.targetGoal} pcs (${pctTarget}%)`;
+      document.getElementById('target-progress-bar').style.width = `${barWidth}%`;
+
+      const totalProcessed = agg.totalLolos + agg.totalReject;
+      const rejectRatio = totalProcessed > 0 ? ((agg.totalReject / totalProcessed) * 100).toFixed(1) : '0.0';
+      document.getElementById('kpi-reject-val').textContent = agg.totalReject;
+      document.getElementById('kpi-reject-ratio').textContent = `Rasio: ${rejectRatio}%`;
+
+      const ikatCount = Math.floor(agg.totalLolos / 5);
+      const sisaPcs = agg.totalLolos % 5;
+      document.getElementById('kpi-packing-ikat').textContent = `${ikatCount} Ikat`;
+      document.getElementById('kpi-packing-sisa').textContent = `Sisa: ${sisaPcs} pcs`;
+
+      document.getElementById('kpi-attendance-val').textContent = `${agg.hadirCount} / 35`;
+
+      const sortedWorkers = [...agg.workerStats].sort(
+        (a, b) => b.lolos - a.lolos || a.reject - b.reject || a.index - b.index
+      );
+      const top3 = sortedWorkers.slice(0, 3);
+
+      const podiumLabels = ['Peringkat 1', 'Peringkat 2', 'Peringkat 3'];
+      const podiumAccents = ['text-amber-400', 'text-slate-300', 'text-orange-400'];
+
+      document.getElementById('top3-podium-container').innerHTML = top3
+        .map((w, idx) => {
+          const prodStr = ((w.lolos / 15) * 100).toFixed(1) + '%';
+          const konversi = getKonversiNilai(w.lolos, w.reject);
+
+          return `
+            <div class="rounded-2xl bg-[#0B0F17] border border-slate-800/70 p-4 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-[11px] font-mono-num font-semibold ${podiumAccents[idx]}">
+                  ${podiumLabels[idx]}
+                </div>
+                <div class="text-lg font-bold text-white truncate mt-0.5">#${w.presensi} ${w.name}</div>
+                <div class="text-xs font-mono-num text-slate-400 mt-0.5">
+                  Prod ${prodStr} • Rej <span class="${w.reject > 0 ? 'text-red-400' : 'text-slate-500'}">${w.reject}</span>
+                </div>
+              </div>
+
+              <div class="text-right shrink-0">
+                <div class="text-2xl font-mono-num font-bold text-emerald-400">
+                  ${w.lolos} <span class="text-xs font-normal text-slate-500">pcs</span>
+                </div>
+                <span class="inline-block mt-1 px-2.5 py-0.5 rounded-md text-xs font-mono-num font-semibold ${konversi.cls}">
+                  Nilai ${konversi.label}
+                </span>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      const rejectWorkers = agg.workerStats.filter((w) => w.reject > 0);
+      document.getElementById('reject-board-count').textContent = `${rejectWorkers.length} Pekerja`;
+      const rejectContainer = document.getElementById('reject-board-content');
+
+      if (rejectWorkers.length === 0) {
+        rejectContainer.innerHTML = `
+          <div class="w-full py-3 px-4 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono-num font-semibold text-xs sm:text-sm text-center">
+            Zero Reject — Semua rakitan lolos QC
+          </div>
+        `;
+      } else {
+        rejectContainer.innerHTML = rejectWorkers
+          .map(
+            (w) => `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-300 font-mono-num font-semibold text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+              <span>#${w.presensi} ${w.name} (${w.reject})</span>
+            </span>
+          `
+          )
+          .join('');
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function selectProjectorDate(dateId) {
+      displayMode = 'daily';
+      activeDateId = dateId;
+      prevHeroLolos = null;
+      renderBoard();
+    }
+
+    function setDisplayMode(mode) {
+      displayMode = mode;
+      prevHeroLolos = null;
+      renderBoard();
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    }
+
+    async function acquireWakeLock() {
+      if ('wakeLock' in navigator && navigator.wakeLock?.request) {
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => {
+            wakeLock = null;
+          });
+        } catch (_) {}
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && !wakeLock) acquireWakeLock();
+    });
+
+    function startLiveClock() {
+      const clockEl = document.getElementById('live-clock');
+      const tick = () => {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      startLiveClock();
+      acquireWakeLock();
+      updateConnectionBadge();
+      initRealtimeBoard();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
