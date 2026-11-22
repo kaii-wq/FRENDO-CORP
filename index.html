@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sedang Pemeliharaan — TEFA Portal Lapangan</title>
+  <title>TEFA Portal Lapangan — SMK Negeri 3 Yogyakarta (Kelas X TE 2)</title>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,7 +14,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -29,103 +28,1672 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Firebase JS SDK v10 Compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
   <style>
-    body {
-      background-color: #121110;
-      color: #F3F0EC;
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    :root {
+      --bg-base: #F6F8FB;
+      --surface-card: rgba(255, 255, 255, 0.90);
+      --border-soft: rgba(203, 213, 225, 0.8);
+      --text-main: #0F172A;
     }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      overscroll-behavior-y: contain;
+    }
+
     .font-mono-num {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
     }
+
+    /* Soft Pastel Daylight Mesh */
+    .ambient-bg {
+      background:
+        radial-gradient(ellipse 65% 50% at 12% 10%, rgba(37, 99, 235, 0.09), transparent 65%),
+        radial-gradient(ellipse 55% 45% at 88% 85%, rgba(13, 148, 136, 0.09), transparent 65%),
+        radial-gradient(ellipse 50% 45% at 80% 15%, rgba(99, 102, 241, 0.06), transparent 60%),
+        #F6F8FB;
+    }
+
+    /* Subtle Dot Matrix */
+    .bg-dot-pattern {
+      background-image: radial-gradient(rgba(100, 116, 139, 0.14) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Clean Frosted Card */
+    .glass-card {
+      background: var(--surface-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-soft);
+      box-shadow:
+        0 10px 30px -10px rgba(15, 23, 42, 0.06),
+        0 2px 6px -1px rgba(15, 23, 42, 0.03),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+    }
+
+    /* Keyframe Animations */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-16px) scale(1.04); }
+    }
+    @keyframes floatReverse {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(16px) scale(0.96); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    @keyframes shimmerSweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .animate-float-slow {
+      animation: floatSlow 8s ease-in-out infinite;
+    }
+    .animate-float-reverse {
+      animation: floatReverse 10s ease-in-out infinite;
+    }
+    .animate-enter {
+      animation: fadeSlideUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .animate-shake {
+      animation: shakeError 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    /* Button Shimmer */
+    .btn-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-shimmer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+    .btn-shimmer:hover::after {
+      animation: shimmerSweep 0.85s ease forwards;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Hide Number Spinners */
+    input[type="number"].no-spinner::-webkit-inner-spin-button,
+    input[type="number"].no-spinner::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"].no-spinner {
+      -moz-appearance: textfield;
+    }
+
+    /* Custom Select Arrow */
+    select.custom-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.95rem center;
+      background-size: 1rem;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-[#121110] text-[#E7E2DC] antialiased flex items-center justify-center p-4 selection:bg-amber-500/20 selection:text-amber-200">
+<body class="min-h-screen ambient-bg bg-dot-pattern text-slate-800 antialiased selection:bg-blue-500/15 selection:text-blue-700">
 
-  <main class="w-full max-w-lg rounded-3xl bg-[#1B1917] border border-[#2C2824] shadow-2xl shadow-black/40 overflow-hidden">
-    <!-- Header Bar -->
-    <div class="px-6 py-4 border-b border-[#262320] flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400">
-          <i data-lucide="wrench" class="w-4 h-4"></i>
+  <!-- FIREBASE CONFIGURATION -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAz5XgzNnll5ON_C7sTIZT9iRuzHL_63w",
+      authDomain: "tefa-aa841.firebaseapp.com",
+      databaseURL: "https://tefa-aa841-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tefa-aa841",
+      storageBucket: "tefa-aa841.firebasestorage.app",
+      messagingSenderId: "645319588053",
+      appId: "1:645319588053:web:0e237892078ad3e9380a5c",
+      measurementId: "G-DMTB0V43J9"
+    };
+  </script>
+
+  <!-- 1. LAYAR LOGIN PORTAL LAPANGAN -->
+  <div id="login-screen" class="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <!-- Dekorasi Cahaya Pastel Melayang -->
+    <div class="pointer-events-none absolute -top-24 -left-24 w-80 h-80 rounded-full bg-blue-400/20 blur-3xl animate-float-slow"></div>
+    <div class="pointer-events-none absolute -bottom-28 -right-24 w-96 h-96 rounded-full bg-teal-400/20 blur-3xl animate-float-reverse"></div>
+
+    <div id="login-card" class="relative z-10 w-full max-w-md rounded-3xl glass-card overflow-hidden animate-enter">
+      <!-- Garis Aksen Atas -->
+      <div class="h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-500 to-teal-500"></div>
+
+      <div class="p-6 sm:p-7 border-b border-slate-200/80">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono-num font-bold text-blue-700 bg-blue-50 border border-blue-200/80">
+            <i data-lucide="hard-hat" class="w-3.5 h-3.5 text-blue-600"></i>
+            PORTAL LAPANGAN
+          </span>
+          <span id="login-db-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono-num font-semibold text-amber-700 bg-amber-50 border border-amber-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            LocalStorage Mode
+          </span>
         </div>
-        <div>
-          <span class="block text-xs font-bold text-white leading-tight">panggilajaray</span>
-          <span class="block text-[11px] text-[#9E968E]">TEFA Portal Lapangan • X TE 2</span>
-        </div>
-      </div>
 
-      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono-num font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/20">
-        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-        Maintenance
-      </span>
-    </div>
-
-    <!-- Main Body -->
-    <div class="p-6 sm:p-8 space-y-6">
-      <div class="space-y-2.5">
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          SISTEM SEDANG DALAM PEMELIHARAAN.
+        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+          SMK Negeri 3 Yogyakarta
         </h1>
-        <p class="text-sm text-[#A89F96] leading-relaxed">
-          Halaman portal operasional sedang diperbarui untuk kelancaran pencatatan produksi dan pengecekan QC. Silakan coba muat ulang beberapa saat lagi.
+        <p class="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-teal-600 shrink-0"></i>
+          <span>Perakitan Songsong Helm Latih • Kelas X TE 2</span>
         </p>
       </div>
 
-      <!-- Status Info Box -->
-      <div class="rounded-2xl bg-[#121110] border border-[#262320] p-4 space-y-3">
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-[#9E968E]">Status Layanan</span>
-          <span class="font-mono-num font-semibold text-amber-400">Pembaruan &amp; Sinkronisasi Data</span>
-        </div>
-        <div class="border-t border-[#221F1C]"></div>
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-[#9E968E]">Lokasi Operasional</span>
-          <span class="font-mono-num font-medium text-[#E7E2DC]">Ruang 84 • Kelas X TE 2</span>
-        </div>
-        <div class="border-t border-[#221F1C]"></div>
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-[#9E968E]">Waktu Lokal</span>
-          <span id="live-clock" class="font-mono-num font-medium text-[#E7E2DC]">--:--:-- WIB</span>
-        </div>
-      </div>
+      <form id="field-login-form" class="p-6 sm:p-7 space-y-5">
+        <div class="space-y-2">
+          <label for="personnel-select" class="block text-xs font-bold uppercase tracking-wider text-slate-500">
+            Identitas Personel
+          </label>
+          <select
+            id="personnel-select"
+            required
+            class="custom-select w-full pl-4 pr-10 py-3 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-sm font-semibold text-slate-800 shadow-sm transition focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+          >
+            <option value="">-- Pilih No. Presensi &amp; Nama --</option>
+          </select>
 
-      <!-- Action Button -->
-      <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
+          <!-- Preview Peran Otomatis saat Murid Dipilih -->
+          <div id="selected-role-preview" class="hidden items-center justify-between px-3.5 py-2.5 rounded-xl bg-blue-50/80 border border-blue-200/70 text-xs animate-enter">
+            <span class="text-slate-600 font-medium flex items-center gap-1.5">
+              <i data-lucide="badge-check" class="w-4 h-4 text-blue-600"></i>
+              Divisi Tugas:
+            </span>
+            <span id="selected-role-text" class="font-bold text-blue-700">-</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="field-pin-input" class="block text-xs font-bold uppercase tracking-wider text-slate-500">
+              PIN Akses (4 Digit)
+            </label>
+            <span id="pin-dots-indicator" class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-slate-200 transition-all duration-200"></span>
+              <span class="w-2 h-2 rounded-full bg-slate-200 transition-all duration-200"></span>
+              <span class="w-2 h-2 rounded-full bg-slate-200 transition-all duration-200"></span>
+              <span class="w-2 h-2 rounded-full bg-slate-200 transition-all duration-200"></span>
+            </span>
+          </div>
+
+          <input
+            id="field-pin-input"
+            type="password"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="4"
+            autocomplete="off"
+            placeholder="••••"
+            required
+            class="w-full text-center text-2xl tracking-[0.55em] font-mono-num font-bold py-3 px-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-900 placeholder-slate-300 shadow-sm transition focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+          />
+
+          <p id="field-login-error" class="hidden pt-1 text-xs font-medium text-rose-600 flex items-center gap-1.5">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+            <span id="field-login-error-text">PIN tidak sesuai dengan murid yang dipilih.</span>
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="btn-shimmer w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Masuk Pos Operasional</span>
+        </button>
+
+        <!-- Footer Info Ruang & Jam Live -->
+        <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] font-mono-num text-slate-500">
+          <span class="flex items-center gap-1.5 font-medium">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-600"></i>
+            Ruang 84 • TEFA
+          </span>
+          <span id="login-live-clock" class="font-semibold text-slate-600">--:--:-- WIB</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. SHELL UTAMA PORTAL OPERASIONAL LAPANGAN -->
+  <div id="portal-shell" class="hidden min-h-screen flex flex-col">
+    <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/80">
+      <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2.5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="header-avatar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-mono-num text-xs font-bold shadow-sm shadow-blue-600/20 shrink-0">
+            #00
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span id="header-user-name" class="text-sm sm:text-base font-bold text-slate-900 truncate">-</span>
+              <span id="header-db-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono-num font-semibold text-amber-700 bg-amber-50 border border-amber-200 shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                LocalStorage Mode
+              </span>
+            </div>
+            <div id="header-user-role" class="text-[11px] font-medium text-slate-500 truncate">-</div>
+          </div>
+        </div>
+
         <button
           type="button"
-          onclick="window.location.reload()"
-          class="flex-1 py-3 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 active:scale-[0.99] text-[#141210] font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer"
+          onclick="logoutPortal()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 hover:border-rose-200 transition active:scale-95 shrink-0 cursor-pointer"
         >
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-          <span>Muat Ulang Halaman</span>
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>Keluar</span>
         </button>
       </div>
-    </div>
+    </header>
 
-    <!-- Footer -->
-    <div class="px-6 py-3.5 bg-[#151311] border-t border-[#262320] flex items-center justify-between text-[11px] text-[#7D756D]">
-      <span>Perakitan Songsong Helm Latih</span>
-      <span class="font-mono-num">v1.0 • TEFA</span>
-    </div>
-  </main>
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-5 space-y-4">
 
+      <!-- Banner Peringatan Kembali ke Tab -->
+      <div id="tab-violation-alert" class="hidden rounded-2xl bg-rose-50 border border-rose-200 p-4 text-rose-900 animate-enter">
+        <div class="flex items-start gap-3">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-rose-600 shrink-0 mt-0.5"></i>
+          <div class="flex-1 text-xs">
+            <div class="font-bold text-rose-800">Keluar Halaman Terdeteksi</div>
+            <p class="mt-0.5 text-rose-700">
+              Aktivitas berpindah tab saat shift telah tercatat otomatis ke log pengawasan.
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="dismissViolationAlert()"
+            class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200/70 text-rose-800 transition cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Fokus & Anti-Main HP Banner (Khusus Koordinator #4-#12) -->
+      <section id="coordinator-focus-panel" class="hidden rounded-2xl glass-card p-4 space-y-3 animate-enter">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+              <i data-lucide="smartphone" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-xs sm:text-sm font-bold text-slate-900">Mode Fokus Koordinator</h2>
+                <span id="wakelock-status-pill" class="text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                  Wake Lock: Memeriksa...
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Layar dijaga tetap menyala. Hindari membuka aplikasi lain selama shift berlangsung.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onclick="toggleFullscreenMode()"
+            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-white shadow-sm shadow-amber-500/20 transition active:scale-95 shrink-0 cursor-pointer"
+          >
+            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+            <span>Fullscreen</span>
+          </button>
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3 text-[11px] text-slate-600 flex items-start gap-2">
+          <i data-lucide="pin" class="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5"></i>
+          <span>
+            <strong class="text-slate-800">Tips Sematkan Layar:</strong> Buka <em>Recent Apps</em>, ketuk ikon browser di bagian atas, lalu pilih <strong>Sematkan Layar (Pin App)</strong>.
+          </span>
+        </div>
+      </section>
+
+      <!-- Navigasi Jadwal 4 Hari Kerja -->
+      <section class="rounded-2xl glass-card p-3.5 sm:p-4 space-y-3 animate-enter">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="field-date-tabs"></div>
+        <div class="pt-2.5 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-num text-slate-500">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-600"></i>
+            <strong id="field-active-date-label" class="text-slate-800">-</strong>
+          </span>
+          <span><strong id="field-meta-kelas" class="text-slate-800">X TE 2</strong> • <strong id="field-meta-ruang" class="text-slate-800">Ruang 84</strong></span>
+          <span>Target: <strong id="field-meta-target" class="text-emerald-600">230 pcs</strong></span>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 1: QUALITY CONTROL (PRESENSI #7 & #8) -->
+      <section id="view-qc" class="role-view hidden animate-enter">
+        <div class="rounded-2xl glass-card p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] font-mono-num text-blue-600 font-bold">Quality Control • Presensi #7 &amp; #8</span>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Kontrol Kualitas per Pekerja (#13–#35)</h2>
+            </div>
+
+            <div class="relative w-full sm:w-64">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input
+                id="qc-search-input"
+                type="text"
+                oninput="renderQCView()"
+                placeholder="Cari nama / no. presensi..."
+                class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 shadow-sm transition focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div id="qc-workers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 2: STOK OPNAME BARANG (PRESENSI #4 & #5) -->
+      <section id="view-stok" class="role-view hidden animate-enter">
+        <div class="rounded-2xl glass-card p-4 sm:p-6 space-y-5">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-mono-num text-blue-600 font-bold">Gudang BLUD (RPS Belakang) • Presensi #4 &amp; #5</span>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Stok Opname Barang</h2>
+            </div>
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 shrink-0">
+              <i data-lucide="warehouse" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="stok-ambil-field" class="block text-xs font-semibold text-slate-600 mb-1.5">Bahan Diambil (Set)</label>
+              <input
+                id="stok-ambil-field"
+                type="number"
+                min="0"
+                onchange="updateDayValue('stokAmbil', Math.max(0, Number(this.value) || 0))"
+                class="no-spinner w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 font-mono-num text-lg font-bold text-slate-900 shadow-sm transition focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label for="stok-setor-field" class="block text-xs font-semibold text-slate-600 mb-1.5">Barang Jadi Disetor (pcs)</label>
+              <input
+                id="stok-setor-field"
+                type="number"
+                min="0"
+                onchange="updateDayValue('stokSetor', Math.max(0, Number(this.value) || 0))"
+                class="no-spinner w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 font-mono-num text-lg font-bold text-slate-900 shadow-sm transition focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="stok-catatan-field" class="block text-xs font-semibold text-slate-600 mb-1.5">
+              Dokumen Pengambilan / Surat Jalan &amp; Kecocokan Barang
+            </label>
+            <textarea
+              id="stok-catatan-field"
+              rows="3"
+              onchange="updateDayValue('stokCatatan', this.value)"
+              placeholder="Catatan surat jalan pengambilan & penyerahan barang jadi / sisa..."
+              class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 shadow-sm transition focus:outline-none focus:border-blue-500"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3.5">
+            <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+              <div class="text-xs font-medium text-emerald-800">Total Lolos QC</div>
+              <div id="stok-total-lolos-display" class="text-xl font-bold font-mono-num text-emerald-700 mt-1">0 pcs</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div class="text-xs font-medium text-slate-600">Selisih (Ambil - Lolos)</div>
+              <div id="stok-selisih-field-display" class="text-xl font-bold font-mono-num text-blue-600 mt-1">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 3: KEPALA UNIT PRODUKSI (PRESENSI #6) -->
+      <section id="view-prod-head" class="role-view hidden animate-enter">
+        <div class="rounded-2xl glass-card p-4 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] font-mono-num text-blue-600 font-bold">Kepala Unit Produksi • Presensi #6</span>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Waktu Produksi &amp; Progres Staf (#13–#35)</h2>
+            </div>
+
+            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
+              <div>
+                <label for="head-jam-mulai" class="block text-[10px] font-semibold text-slate-500">Mulai</label>
+                <input
+                  id="head-jam-mulai"
+                  type="time"
+                  onchange="updateDayValue('jamMulai', this.value)"
+                  class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-mono-num font-semibold text-slate-800"
+                />
+              </div>
+              <div>
+                <label for="head-jam-selesai" class="block text-[10px] font-semibold text-slate-500">Selesai</label>
+                <input
+                  id="head-jam-selesai"
+                  type="time"
+                  onchange="updateDayValue('jamSelesai', this.value)"
+                  class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-mono-num font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              id="head-filter-all"
+              type="button"
+              onclick="setHeadFilter('all')"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm shadow-blue-600/20 transition cursor-pointer"
+            >
+              Semua (23)
+            </button>
+            <button
+              id="head-filter-below"
+              type="button"
+              onclick="setHeadFilter('below')"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition cursor-pointer"
+            >
+              Belum Target &lt;10
+            </button>
+            <button
+              id="head-filter-met"
+              type="button"
+              onclick="setHeadFilter('met')"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition cursor-pointer"
+            >
+              Sesuai/Melebihi &ge;10
+            </button>
+          </div>
+
+          <div id="head-workers-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 4: PENGEMASAN DAN PENGIRIMAN (PRESENSI #9 & #10) -->
+      <section id="view-packing" class="role-view hidden animate-enter">
+        <div class="rounded-2xl glass-card p-4 sm:p-6 space-y-5">
+          <div>
+            <span class="text-[11px] font-mono-num text-indigo-600 font-bold">Pengemasan dan Pengiriman • Presensi #9 &amp; #10</span>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Kalkulator Ikatan Kemasan (Menali per 5 pcs)</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+              <div class="text-xs font-semibold text-emerald-800">Lolos QC</div>
+              <div id="pack-total-lolos" class="text-2xl sm:text-3xl font-bold font-mono-num text-emerald-700 mt-1">0 pcs</div>
+              <div class="text-[11px] text-emerald-600/80 mt-1">Dinyatakan lolos QC</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80">
+              <div class="text-xs font-semibold text-blue-800">Rekomendasi Ikatan (@5)</div>
+              <div id="pack-calc-ikat" class="text-2xl sm:text-3xl font-bold font-mono-num text-blue-700 mt-1">0 Ikat</div>
+              <div id="pack-calc-sisa" class="text-xs font-mono-num font-semibold text-amber-600 mt-1">Sisa: 0 pcs</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+              <label for="pack-verified-input" class="block text-xs font-bold text-indigo-700 mb-1.5">
+                Dikemas Terverifikasi (Ikat)
+              </label>
+              <input
+                id="pack-verified-input"
+                type="number"
+                min="0"
+                onchange="updateDayValue('packingVerified', Math.max(0, Number(this.value) || 0))"
+                class="no-spinner w-full px-3 py-2 rounded-xl bg-white border border-slate-200 font-mono-num text-xl font-bold text-slate-900 shadow-sm transition focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 5: PENANGGUNG JAWAB 5R (PRESENSI #11 & #12) -->
+      <section id="view-5r" class="role-view hidden animate-enter">
+        <div class="rounded-2xl glass-card p-4 sm:p-6 space-y-5">
+          <div>
+            <span class="text-[11px] font-mono-num text-teal-600 font-bold">Penanggung Jawab 5R • Presensi #11 &amp; #12</span>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Checklist Budaya Kerja 5R</h2>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="field-5r-cards"></div>
+
+          <div>
+            <label for="field-5r-note" class="block text-xs font-semibold text-slate-600 mb-1.5">
+              Catatan Penataan &amp; Pemeliharaan Tempat Kerja
+            </label>
+            <textarea
+              id="field-5r-note"
+              rows="3"
+              onchange="updateDayValue('catatan5R', this.value)"
+              placeholder="Catat hasil Ringkas, Rapi, Resik, Rawat, Rajin..."
+              class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 shadow-sm transition focus:outline-none focus:border-teal-500"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW PERAN 6: STAF UNIT PRODUKSI (PRESENSI #13-#35) -->
+      <section id="view-worker" class="role-view hidden space-y-4 animate-enter">
+        <div id="worker-reject-alert" class="hidden rounded-2xl bg-rose-50 border border-rose-200 p-4 text-rose-900">
+          <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="text-sm font-bold text-rose-800">
+                Ada barang Reject — segera revisi di meja QC (Presensi #7 &amp; #8)
+              </div>
+              <p class="text-xs text-rose-700 mt-0.5">
+                Perbaiki unit reject agar hasil perakitan songsong helm memenuhi standar kualitas.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl glass-card p-4 sm:p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-mono-num text-blue-600 font-bold">Kartu Skor Pribadi (Target 10 pcs)</span>
+              <h2 id="worker-card-name" class="text-lg font-extrabold text-slate-900 mt-0.5">-</h2>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] font-medium text-slate-500">Konversi Nilai</div>
+              <span id="worker-grade-badge" class="inline-block mt-1 px-3 py-1 rounded-lg text-sm font-mono-num font-bold">
+                -
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-center">
+              <div class="text-[11px] font-semibold text-emerald-800">Lolos QC</div>
+              <div id="worker-stat-lolos" class="text-2xl font-bold font-mono-num text-emerald-600 mt-1">0</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200/80 text-center">
+              <div class="text-[11px] font-semibold text-rose-800">Reject</div>
+              <div id="worker-stat-reject" class="text-2xl font-bold font-mono-num text-rose-600 mt-1">0</div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+              <div class="text-[11px] font-semibold text-slate-600">% Prod (/15)</div>
+              <div id="worker-stat-prod" class="text-2xl font-bold font-mono-num text-slate-900 mt-1">0.0%</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono-num">
+              <span class="text-slate-600 font-medium">Target Pribadi (10 pcs • KKM 76)</span>
+              <span id="worker-progress-label" class="font-bold text-blue-600">0 / 10 pcs</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+              <div id="worker-progress-bar" class="h-full rounded-full transition-all duration-500 bg-amber-500" style="width: 0%;"></div>
+            </div>
+            <p id="worker-cheer-message" class="text-xs font-semibold text-amber-700">
+              Target 10 pcs per anggota belum tercapai.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="rounded-2xl glass-card p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                <i data-lucide="target" class="w-4 h-4 text-blue-600"></i>
+                Target Bersama Kelas
+              </h3>
+              <span id="class-target-pct-text" class="text-sm font-mono-num font-bold text-blue-600">0%</span>
+            </div>
+
+            <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+              <div id="class-target-bar" class="h-full bg-gradient-to-r from-blue-600 to-teal-500 transition-all duration-500" style="width: 0%;"></div>
+            </div>
+
+            <div class="flex justify-between text-xs font-mono-num text-slate-500">
+              <span>Tercapai: <strong id="class-target-achieved" class="text-slate-900">0 pcs</strong></span>
+              <span>Target: <strong id="class-target-goal" class="text-blue-600">230 pcs</strong></span>
+            </div>
+          </div>
+
+          <div class="rounded-2xl glass-card p-4 sm:p-5 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+              <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+              Top 3 Pencapaian Tercepat
+            </h3>
+            <div id="worker-podium-list" class="space-y-2"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 3. MODAL INPUT BORONGAN (KHUSUS QC) -->
+  <div id="borongan-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden animate-enter">
+      <div class="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono-num text-blue-600 font-bold">Input Borongan QC</span>
+          <h3 id="borongan-worker-title" class="text-base font-bold text-slate-900">-</h3>
+        </div>
+        <button type="button" onclick="closeBoronganModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="borongan-form" class="p-5 space-y-4">
+        <input type="hidden" id="borongan-worker-index" />
+
+        <div>
+          <label for="borongan-add-lolos" class="block text-xs font-bold text-emerald-700 mb-1">
+            Tambah Lolos QC (+ pcs)
+          </label>
+          <input
+            id="borongan-add-lolos"
+            type="number"
+            min="0"
+            value="0"
+            class="no-spinner w-full px-3.5 py-2.5 rounded-xl bg-emerald-50/50 border border-emerald-200 font-mono-num text-lg font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <div>
+          <label for="borongan-add-reject" class="block text-xs font-bold text-rose-700 mb-1">
+            Tambah Reject (+ unit)
+          </label>
+          <input
+            id="borongan-add-reject"
+            type="number"
+            min="0"
+            value="0"
+            class="no-spinner w-full px-3.5 py-2.5 rounded-xl bg-rose-50/50 border border-rose-200 font-mono-num text-lg font-bold text-rose-700 focus:outline-none focus:border-rose-500"
+          />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeBoronganModal()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-600/20 transition cursor-pointer"
+          >
+            Tambahkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 4. JAVASCRIPT LOGIC -->
   <script>
-    function updateClock() {
+    const ROOT_REF_PATH = 'tefa_songsong';
+    const LOCAL_STORAGE_KEY = 'tefa_songsong_v1_data';
+    const SESSION_PORTAL_KEY = 'tefa_portal_session_v1';
+
+    const SCHEDULE_DAYS = [
+      { id: '2026-11-23', short: '23 Nov', day: 'Senin', full: '23 November 2026' },
+      { id: '2026-11-24', short: '24 Nov', day: 'Selasa', full: '24 November 2026' },
+      { id: '2026-11-26', short: '26 Nov', day: 'Kamis', full: '26 November 2026' },
+      { id: '2026-11-27', short: '27 Nov', day: 'Jumat', full: '27 November 2026' },
+    ];
+
+    const COORDINATORS = [
+      { presensi: 4, pin: '1004', name: 'Yuda', role: 'Stok Opname Barang', view: 'stok', isCoordinator: true },
+      { presensi: 5, pin: '1005', name: 'Alba', role: 'Stok Opname Barang', view: 'stok', isCoordinator: true },
+      { presensi: 6, pin: '1006', name: 'Kifah', role: 'Kepala Unit Produksi', view: 'prod-head', isCoordinator: true },
+      { presensi: 7, pin: '1007', name: 'Thalita', role: 'Quality Control', view: 'qc', isCoordinator: true },
+      { presensi: 8, pin: '1008', name: 'Alpan', role: 'Quality Control', view: 'qc', isCoordinator: true },
+      { presensi: 9, pin: '1009', name: 'Putra', role: 'Pengemasan dan Pengiriman', view: 'packing', isCoordinator: true },
+      { presensi: 10, pin: '1010', name: 'Hidan', role: 'Pengemasan dan Pengiriman', view: 'packing', isCoordinator: true },
+      { presensi: 11, pin: '1011', name: 'Isa', role: 'Penanggung Jawab 5R', view: '5r', isCoordinator: true },
+      { presensi: 12, pin: '1012', name: 'Safa', role: 'Penanggung Jawab 5R', view: '5r', isCoordinator: true },
+    ];
+
+    const PRODUCTION_WORKERS = [
+      { index: 0, presensi: 13, name: 'Rhino', pin: '2001' },
+      { index: 1, presensi: 14, name: 'Redi', pin: '2002' },
+      { index: 2, presensi: 15, name: 'Rafa', pin: '2003' },
+      { index: 3, presensi: 16, name: 'Aqim', pin: '2004' },
+      { index: 4, presensi: 17, name: 'Raihan', pin: '2005' },
+      { index: 5, presensi: 18, name: 'Fajar', pin: '2006' },
+      { index: 6, presensi: 19, name: 'Embun', pin: '2007' },
+      { index: 7, presensi: 20, name: 'Nazwa', pin: '2008' },
+      { index: 8, presensi: 21, name: 'Dea', pin: '2009' },
+      { index: 9, presensi: 22, name: 'Alvi', pin: '2010' },
+      { index: 10, presensi: 23, name: 'Ziva', pin: '2011' },
+      { index: 11, presensi: 24, name: 'Cyrilla', pin: '2012' },
+      { index: 12, presensi: 25, name: 'Neysa', pin: '2013' },
+      { index: 13, presensi: 26, name: 'Akmal', pin: '2014' },
+      { index: 14, presensi: 27, name: 'Milo', pin: '2015' },
+      { index: 15, presensi: 28, name: 'Tegar', pin: '2016' },
+      { index: 16, presensi: 29, name: 'Vika', pin: '2017' },
+      { index: 17, presensi: 30, name: 'Aul', pin: '2018' },
+      { index: 18, presensi: 31, name: 'Ilham Daniswara', pin: '2019' },
+      { index: 19, presensi: 32, name: 'Ilham Bayu', pin: '2020' },
+      { index: 20, presensi: 33, name: 'Damar', pin: '2021' },
+      { index: 21, presensi: 34, name: 'Sakti', pin: '2022' },
+      { index: 22, presensi: 35, name: 'Hafidz', pin: '2023' },
+    ];
+
+    const ALL_FIELD_USERS = [
+      ...COORDINATORS,
+      ...PRODUCTION_WORKERS.map((w) => ({
+        presensi: w.presensi,
+        pin: w.pin,
+        name: w.name,
+        role: 'Staf Unit Produksi',
+        view: 'worker',
+        workerIndex: w.index,
+        isCoordinator: false,
+      })),
+    ];
+
+    const FIVE_R_LABELS = ['Ringkas', 'Rapi', 'Resik', 'Rawat', 'Rajin'];
+
+    let isFirebaseConnected = false;
+    let dbRef = null;
+    let activeDateId = SCHEDULE_DAYS[0].id;
+    let activeUser = null;
+    let headFilterMode = 'all';
+    let wakeLockSentinel = null;
+    let lastViolationTimestamp = 0;
+
+    function createDefaultDay() {
+      const workers = {};
+      PRODUCTION_WORKERS.forEach((w) => {
+        workers[String(w.index)] = { lolos: 0, reject: 0 };
+      });
+      return {
+        jamMulai: '07:30',
+        jamSelesai: '15:00',
+        stokAmbil: 0,
+        stokSetor: 0,
+        stokCatatan: '',
+        packingVerified: 0,
+        fiveR: [false, false, false, false, false],
+        catatan5R: '',
+        kasPemasukan: 0,
+        kasPengeluaran: 0,
+        kasKeterangan: '',
+        linkVideo: '',
+        catatanAdmin: '',
+        logPelanggaranTab: [],
+        attendance: {},
+        workers,
+      };
+    }
+
+    function createDefaultDb() {
+      const days = {};
+      SCHEDULE_DAYS.forEach((d) => {
+        days[d.id] = createDefaultDay();
+      });
+      return {
+        meta: {
+          kelas: 'X TE 2',
+          ruang: 'Ruang 84',
+          instruktur: '',
+          targetHarianKelas: 230,
+        },
+        days,
+      };
+    }
+
+    function normalizeDb(raw) {
+      const base = createDefaultDb();
+      if (!raw || typeof raw !== 'object') return base;
+
+      base.meta = {
+        kelas: raw.meta?.kelas ?? 'X TE 2',
+        ruang: raw.meta?.ruang ?? 'Ruang 84',
+        instruktur: raw.meta?.instruktur ?? '',
+        targetHarianKelas: Number(raw.meta?.targetHarianKelas) > 0 ? Number(raw.meta.targetHarianKelas) : 230,
+      };
+
+      SCHEDULE_DAYS.forEach((d) => {
+        const dRaw = raw.days?.[d.id] || {};
+        const dDef = createDefaultDay();
+
+        const fiveR = Array.isArray(dRaw.fiveR)
+          ? [0, 1, 2, 3, 4].map((i) => Boolean(dRaw.fiveR[i]))
+          : dDef.fiveR;
+
+        const workers = { ...dDef.workers };
+        if (dRaw.workers && typeof dRaw.workers === 'object') {
+          PRODUCTION_WORKERS.forEach((w) => {
+            const k = String(w.index);
+            const wObj = dRaw.workers[k] || dRaw.workers[w.index] || {};
+            workers[k] = {
+              ...wObj,
+              lolos: Math.max(0, Number(wObj.lolos) || 0),
+              reject: Math.max(0, Number(wObj.reject) || 0),
+            };
+          });
+        }
+
+        const logs = Array.isArray(dRaw.logPelanggaranTab)
+          ? dRaw.logPelanggaranTab
+          : dRaw.logPelanggaranTab && typeof dRaw.logPelanggaranTab === 'object'
+          ? Object.values(dRaw.logPelanggaranTab)
+          : [];
+
+        base.days[d.id] = {
+          jamMulai: dRaw.jamMulai || '07:30',
+          jamSelesai: dRaw.jamSelesai || '15:00',
+          stokAmbil: Math.max(0, Number(dRaw.stokAmbil) || 0),
+          stokSetor: Math.max(0, Number(dRaw.stokSetor) || 0),
+          stokCatatan: dRaw.stokCatatan || '',
+          packingVerified: Math.max(0, Number(dRaw.packingVerified) || 0),
+          fiveR,
+          catatan5R: dRaw.catatan5R || '',
+          kasPemasukan: Math.max(0, Number(dRaw.kasPemasukan) || 0),
+          kasPengeluaran: Math.max(0, Number(dRaw.kasPengeluaran) || 0),
+          kasKeterangan: dRaw.kasKeterangan || '',
+          linkVideo: dRaw.linkVideo || '',
+          catatanAdmin: dRaw.catatanAdmin || '',
+          logPelanggaranTab: logs,
+          attendance: dRaw.attendance && typeof dRaw.attendance === 'object' ? dRaw.attendance : {},
+          workers,
+        };
+      });
+
+      return base;
+    }
+
+    let dbState = normalizeDb(
+      (() => {
+        try {
+          const s = localStorage.getItem(LOCAL_STORAGE_KEY);
+          return s ? JSON.parse(s) : null;
+        } catch (_) {
+          return null;
+        }
+      })()
+    );
+
+    function isPlaceholderConfig(cfg) {
+      if (!cfg || !cfg.apiKey || !cfg.databaseURL) return true;
+      return (
+        cfg.apiKey.includes('YOUR_') ||
+        cfg.databaseURL.includes('YOUR_') ||
+        cfg.projectId?.includes('YOUR_')
+      );
+    }
+
+    function updateConnectionUI() {
+      const label = isFirebaseConnected ? 'Firebase Live' : 'LocalStorage Mode';
+      const cls = isFirebaseConnected
+        ? 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono-num font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200'
+        : 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono-num font-semibold text-amber-700 bg-amber-50 border border-amber-200';
+      const dot = isFirebaseConnected
+        ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>'
+        : '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>';
+
+      const loginBadge = document.getElementById('login-db-badge');
+      if (loginBadge) {
+        loginBadge.className = cls;
+        loginBadge.innerHTML = `${dot}<span>${label}</span>`;
+      }
+      const headerBadge = document.getElementById('header-db-badge');
+      if (headerBadge) {
+        headerBadge.className = cls;
+        headerBadge.innerHTML = `${dot}<span>${label}</span>`;
+      }
+    }
+
+    function initDatabase() {
+      if (!isPlaceholderConfig(firebaseConfig) && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          dbRef = firebase.database().ref(ROOT_REF_PATH);
+          isFirebaseConnected = true;
+          updateConnectionUI();
+
+          dbRef.on(
+            'value',
+            (snap) => {
+              const val = snap.val();
+              if (val) {
+                dbState = normalizeDb(val);
+                try {
+                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
+                } catch (_) {}
+              } else {
+                dbRef.set(dbState);
+              }
+              if (activeUser) renderPortal();
+            },
+            () => {
+              isFirebaseConnected = false;
+              updateConnectionUI();
+              if (activeUser) renderPortal();
+            }
+          );
+          return;
+        } catch (_) {}
+      }
+
+      isFirebaseConnected = false;
+      updateConnectionUI();
+    }
+
+    function saveDb(toastMsg = null) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
+      } catch (_) {}
+
+      if (isFirebaseConnected && dbRef) {
+        dbRef.set(dbState).catch(() => {});
+      }
+
+      if (toastMsg) showToast(toastMsg);
+      if (activeUser) renderPortal();
+    }
+
+    function populatePersonnelDropdown() {
+      const select = document.getElementById('personnel-select');
+      const coordGroup = document.createElement('optgroup');
+      coordGroup.label = 'A. Koordinator Lapangan (Presensi #4–#12)';
+      COORDINATORS.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c.pin;
+        opt.textContent = `#${c.presensi} ${c.name} — ${c.role}`;
+        coordGroup.appendChild(opt);
+      });
+
+      const staffGroup = document.createElement('optgroup');
+      staffGroup.label = 'B. Staf Unit Produksi (Presensi #13–#35)';
+      PRODUCTION_WORKERS.forEach((w) => {
+        const opt = document.createElement('option');
+        opt.value = w.pin;
+        opt.textContent = `#${w.presensi} ${w.name} — Staf Unit Produksi`;
+        staffGroup.appendChild(opt);
+      });
+
+      select.appendChild(coordGroup);
+      select.appendChild(staffGroup);
+    }
+
+    const personnelSelectEl = document.getElementById('personnel-select');
+    const pinInputEl = document.getElementById('field-pin-input');
+    const rolePreviewEl = document.getElementById('selected-role-preview');
+    const rolePreviewTextEl = document.getElementById('selected-role-text');
+
+    personnelSelectEl.addEventListener('change', () => {
+      document.getElementById('field-login-error').classList.add('hidden');
+      const found = ALL_FIELD_USERS.find((u) => u.pin === personnelSelectEl.value);
+      if (found) {
+        rolePreviewTextEl.textContent = found.role;
+        rolePreviewEl.classList.remove('hidden');
+        rolePreviewEl.classList.add('flex');
+        pinInputEl.focus();
+      } else {
+        rolePreviewEl.classList.add('hidden');
+        rolePreviewEl.classList.remove('flex');
+      }
+    });
+
+    pinInputEl.addEventListener('input', () => {
+      pinInputEl.value = pinInputEl.value.replace(/\D/g, '').slice(0, 4);
+      document.getElementById('field-login-error').classList.add('hidden');
+      updatePinDots(pinInputEl.value.length);
+    });
+
+    function updatePinDots(len) {
+      const dots = document.querySelectorAll('#pin-dots-indicator span');
+      dots.forEach((dot, i) => {
+        if (i < len) {
+          dot.className = 'w-2 h-2 rounded-full bg-blue-600 scale-110 shadow-[0_0_8px_rgba(37,99,235,0.5)] transition-all duration-200';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-slate-200 transition-all duration-200';
+        }
+      });
+    }
+
+    function updateLoginClock() {
+      const el = document.getElementById('login-live-clock');
+      if (!el) return;
       const now = new Date();
-      const timeStr = now.toLocaleTimeString('id-ID', {
+      el.textContent = now.toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
+      }) + ' WIB';
+    }
+    setInterval(updateLoginClock, 1000);
+
+    function triggerLoginError(message) {
+      const errBox = document.getElementById('field-login-error');
+      const errText = document.getElementById('field-login-error-text');
+      const card = document.getElementById('login-card');
+
+      errText.textContent = message;
+      errBox.classList.remove('hidden');
+      card.classList.remove('animate-shake');
+      void card.offsetWidth;
+      card.classList.add('animate-shake');
+    }
+
+    document.getElementById('field-login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pin = personnelSelectEl.value;
+      const enteredPin = pinInputEl.value.trim();
+
+      if (!pin) {
+        triggerLoginError('Silakan pilih no. presensi & nama terlebih dahulu.');
+        return;
+      }
+
+      const found = ALL_FIELD_USERS.find((u) => u.pin === pin);
+      if (!found || found.pin !== enteredPin) {
+        triggerLoginError('PIN 4 digit tidak sesuai untuk akun yang dipilih.');
+        pinInputEl.value = '';
+        updatePinDots(0);
+        pinInputEl.focus();
+        return;
+      }
+
+      document.getElementById('field-login-error').classList.add('hidden');
+      activeUser = found;
+      sessionStorage.setItem(SESSION_PORTAL_KEY, JSON.stringify({ pin: found.pin }));
+      enterPortal();
+      showToast(`Masuk sebagai #${found.presensi} ${found.name}`);
+    });
+
+    function restorePortalSession() {
+      try {
+        const raw = sessionStorage.getItem(SESSION_PORTAL_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const found = ALL_FIELD_USERS.find((u) => u.pin === parsed?.pin);
+          if (found) {
+            activeUser = found;
+            enterPortal();
+            return;
+          }
+        }
+      } catch (_) {}
+    }
+
+    function enterPortal() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('portal-shell').classList.remove('hidden');
+
+      document.getElementById('header-avatar').textContent = `#${activeUser.presensi}`;
+      document.getElementById('header-user-name').textContent = activeUser.name;
+      document.getElementById('header-user-role').textContent = `${activeUser.role} • Presensi #${activeUser.presensi}`;
+
+      document.querySelectorAll('.role-view').forEach((el) => el.classList.add('hidden'));
+      const targetView = document.getElementById(`view-${activeUser.view}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      const focusPanel = document.getElementById('coordinator-focus-panel');
+      if (activeUser.isCoordinator) {
+        focusPanel.classList.remove('hidden');
+        requestScreenWakeLock();
+      } else {
+        focusPanel.classList.add('hidden');
+        releaseScreenWakeLock();
+      }
+
+      renderPortal();
+    }
+
+    function logoutPortal() {
+      sessionStorage.removeItem(SESSION_PORTAL_KEY);
+      activeUser = null;
+      releaseScreenWakeLock();
+      document.getElementById('portal-shell').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      pinInputEl.value = '';
+      updatePinDots(0);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function requestScreenWakeLock() {
+      const pill = document.getElementById('wakelock-status-pill');
+      if ('wakeLock' in navigator && navigator.wakeLock?.request) {
+        try {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+          if (pill) {
+            pill.textContent = 'Wake Lock: Aktif';
+            pill.className = 'text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+          }
+          wakeLockSentinel.addEventListener('release', () => {
+            if (pill && activeUser?.isCoordinator) {
+              pill.textContent = 'Wake Lock: Jeda';
+              pill.className = 'text-[10px] font-mono-num font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200';
+            }
+          });
+        } catch (_) {
+          if (pill) pill.textContent = 'Wake Lock: Nonaktif';
+        }
+      } else if (pill) {
+        pill.textContent = 'Wake Lock: Tidak didukung';
+      }
+    }
+
+    async function releaseScreenWakeLock() {
+      if (wakeLockSentinel) {
+        try {
+          await wakeLockSentinel.release();
+        } catch (_) {}
+        wakeLockSentinel = null;
+      }
+    }
+
+    function toggleFullscreenMode() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(() => {
+          showToast('Fullscreen tidak diizinkan browser.');
+        });
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!activeUser || !activeUser.isCoordinator) return;
+
+      if (document.visibilityState === 'hidden') {
+        const now = Date.now();
+        if (now - lastViolationTimestamp < 2000) return;
+        lastViolationTimestamp = now;
+
+        const nowTimeStr = new Date().toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+
+        const dayObj = dbState.days[activeDateId];
+        if (!Array.isArray(dayObj.logPelanggaranTab)) dayObj.logPelanggaranTab = [];
+        dayObj.logPelanggaranTab.push({
+          nama: `#${activeUser.presensi} ${activeUser.name}`,
+          role: activeUser.role,
+          waktu: nowTimeStr,
+          keterangan: 'Keluar dari halaman operasional',
+        });
+        saveDb();
+      } else if (document.visibilityState === 'visible') {
+        requestScreenWakeLock();
+        const dayObj = dbState.days[activeDateId];
+        const hasMyLog = (dayObj.logPelanggaranTab || []).some(
+          (item) => typeof item === 'object' && item.nama === `#${activeUser.presensi} ${activeUser.name}`
+        );
+        if (hasMyLog) {
+          document.getElementById('tab-violation-alert').classList.remove('hidden');
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      }
+    });
+
+    function dismissViolationAlert() {
+      document.getElementById('tab-violation-alert').classList.add('hidden');
+    }
+
+    function getGradeInfo(lolos, reject) {
+      const l = Number(lolos) || 0;
+      const r = Number(reject) || 0;
+
+      if (l === 0 && r === 0) return { label: '-', cls: 'bg-slate-100 text-slate-500 border border-slate-200' };
+      if (l < 10) return { label: 'Tidak KKM', cls: 'bg-rose-50 text-rose-700 border border-rose-200' };
+      if (l > 10 && r === 0) return { label: '100', cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' };
+      if (l > 10 && r > 0) return { label: '96', cls: 'bg-blue-50 text-blue-700 border border-blue-200' };
+      if (l === 10 && r === 0) return { label: '86', cls: 'bg-teal-50 text-teal-700 border border-teal-200' };
+      return { label: '76', cls: 'bg-amber-50 text-amber-700 border border-amber-200' };
+    }
+
+    function getTotalLolosDay(dayId) {
+      const day = dbState.days[dayId];
+      let total = 0;
+      PRODUCTION_WORKERS.forEach((w) => {
+        total += Number(day.workers?.[String(w.index)]?.lolos) || 0;
       });
-      const el = document.getElementById('live-clock');
-      if (el) el.textContent = timeStr + ' WIB';
+      return total;
+    }
+
+    function renderPortal() {
+      renderDateTabs();
+      if (!activeUser) return;
+
+      if (activeUser.view === 'qc') renderQCView();
+      if (activeUser.view === 'stok') renderStokView();
+      if (activeUser.view === 'prod-head') renderProdHeadView();
+      if (activeUser.view === 'packing') renderPackingView();
+      if (activeUser.view === '5r') renderFiveRView();
+      if (activeUser.view === 'worker') renderWorkerView();
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderDateTabs() {
+      const container = document.getElementById('field-date-tabs');
+      container.innerHTML = SCHEDULE_DAYS.map((d) => {
+        const active = d.id === activeDateId;
+        return `
+          <button
+            type="button"
+            onclick="selectFieldDate('${d.id}')"
+            class="p-2.5 rounded-xl border text-left transition-all active:scale-[0.98] cursor-pointer ${
+              active
+                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20'
+                : 'bg-white border-slate-200/90 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+            }"
+          >
+            <div class="text-[10px] font-bold ${active ? 'text-blue-100' : 'text-slate-400'}">${d.day}</div>
+            <div class="text-xs sm:text-sm font-mono-num font-bold mt-0.5">${d.short}</div>
+          </button>
+        `;
+      }).join('');
+
+      const activeObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
+      document.getElementById('field-active-date-label').textContent = `${activeObj.day}, ${activeObj.full}`;
+      document.getElementById('field-meta-kelas').textContent = dbState.meta.kelas;
+      document.getElementById('field-meta-ruang').textContent = dbState.meta.ruang;
+      document.getElementById('field-meta-target').textContent = `${dbState.meta.targetHarianKelas} pcs`;
+    }
+
+    function selectFieldDate(dateId) {
+      activeDateId = dateId;
+      renderPortal();
+    }
+
+    function updateDayValue(field, value) {
+      dbState.days[activeDateId][field] = value;
+      saveDb('Data tersimpan');
+    }
+
+    function renderQCView() {
+      const day = dbState.days[activeDateId];
+      const q = (document.getElementById('qc-search-input')?.value || '').trim().toLowerCase();
+      const grid = document.getElementById('qc-workers-grid');
+
+      const list = PRODUCTION_WORKERS.filter(
+        (w) => !q || w.name.toLowerCase().includes(q) || String(w.presensi).includes(q)
+      );
+
+      grid.innerHTML = list
+        .map((w) => {
+          const data = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+          const lolos = Number(data.lolos) || 0;
+          const reject = Number(data.reject) || 0;
+          const grade = getGradeInfo(lolos, reject);
+
+          return `
+            <div class="rounded-2xl bg-white border border-slate-200/90 hover:border-blue-300/80 p-4 space-y-3 shadow-sm transition">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="px-2.5 h-7 rounded-lg bg-blue-50 border border-blue-200/80 flex items-center justify-center font-mono-num text-xs font-bold text-blue-700">
+                    #${w.presensi}
+                  </span>
+                  <div>
+                    <div class="text-sm font-bold text-slate-900">${w.name}</div>
+                    <div class="text-[11px] font-mono-num text-slate-400">Presensi #${w.presensi}</div>
+                  </div>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-lg text-xs font-mono-num font-bold ${grade.cls}">
+                  Nilai: ${grade.label}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5 text-center">
+                <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/70">
+                  <div class="text-[10px] font-semibold text-emerald-800">Lolos QC</div>
+                  <div class="text-xl font-mono-num font-bold text-emerald-600">${lolos}</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-rose-50/70 border border-rose-200/70">
+                  <div class="text-[10px] font-semibold text-rose-800">Reject</div>
+                  <div class="text-xl font-mono-num font-bold text-rose-600">${reject}</div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'lolos', 1)"
+                  class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm shadow-emerald-600/20 cursor-pointer active:scale-95 transition"
+                >
+                  +1 Lolos
+                </button>
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'lolos', -1)"
+                  class="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-mono-num font-semibold text-xs border border-slate-200 active:scale-95 transition cursor-pointer"
+                >
+                  -1
+                </button>
+
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'reject', 1)"
+                  class="flex-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-sm shadow-rose-600/20 cursor-pointer active:scale-95 transition"
+                >
+                  +1 Rej
+                </button>
+                <button
+                  type="button"
+                  onclick="adjustQC(${w.index}, 'reject', -1)"
+                  class="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-mono-num font-semibold text-xs border border-slate-200 active:scale-95 transition cursor-pointer"
+                >
+                  -1
+                </button>
+
+                <button
+                  type="button"
+                  onclick="openBoronganModal(${w.index})"
+                  class="w-full py-2 px-3 rounded-xl bg-blue-50/80 hover:bg-blue-100/80 text-blue-700 border border-blue-200/80 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer mt-0.5"
+                >
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                  <span>Input Borongan</span>
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function adjustQC(workerIdx, type, delta) {
+      const key = String(workerIdx);
+      const curr = dbState.days[activeDateId].workers[key] || { lolos: 0, reject: 0 };
+      const nextVal = Math.max(0, (Number(curr[type]) || 0) + delta);
+      dbState.days[activeDateId].workers[key] = { ...curr, [type]: nextVal };
+      saveDb(`QC #${PRODUCTION_WORKERS[workerIdx].presensi} ${PRODUCTION_WORKERS[workerIdx].name} diperbarui`);
+    }
+
+    function openBoronganModal(workerIdx) {
+      const w = PRODUCTION_WORKERS[workerIdx];
+      document.getElementById('borongan-worker-index').value = workerIdx;
+      document.getElementById('borongan-worker-title').textContent = `#${w.presensi} ${w.name}`;
+      document.getElementById('borongan-add-lolos').value = 0;
+      document.getElementById('borongan-add-reject').value = 0;
+
+      const modal = document.getElementById('borongan-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeBoronganModal() {
+      const modal = document.getElementById('borongan-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('borongan-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idx = Number(document.getElementById('borongan-worker-index').value);
+      const addLolos = Math.max(0, Number(document.getElementById('borongan-add-lolos').value) || 0);
+      const addReject = Math.max(0, Number(document.getElementById('borongan-add-reject').value) || 0);
+
+      const key = String(idx);
+      const curr = dbState.days[activeDateId].workers[key] || { lolos: 0, reject: 0 };
+      dbState.days[activeDateId].workers[key] = {
+        ...curr,
+        lolos: (Number(curr.lolos) || 0) + addLolos,
+        reject: (Number(curr.reject) || 0) + addReject,
+      };
+      closeBoronganModal();
+      saveDb(`Borongan +${addLolos} lolos, +${addReject} reject`);
+    });
+
+    function renderStokView() {
+      const day = dbState.days[activeDateId];
+      const totalLolos = getTotalLolosDay(activeDateId);
+      const stokAmbil = Number(day.stokAmbil) || 0;
+      const selisih = stokAmbil - totalLolos;
+
+      document.getElementById('stok-ambil-field').value = stokAmbil;
+      document.getElementById('stok-setor-field').value = Number(day.stokSetor) || 0;
+      document.getElementById('stok-catatan-field').value = day.stokCatatan || '';
+      document.getElementById('stok-total-lolos-display').textContent = `${totalLolos} pcs`;
+
+      const selEl = document.getElementById('stok-selisih-field-display');
+      selEl.textContent = `${selisih > 0 ? '+' : ''}${selisih}`;
+      selEl.className = `text-xl font-bold font-mono-num mt-1 ${
+        selisih < 0 ? 'text-rose-600' : selisih > 0 ? 'text-amber-600' : 'text-emerald-600'
+      }`;
+    }
+
+    function setHeadFilter(mode) {
+      headFilterMode = mode;
+      ['all', 'below', 'met'].forEach((m) => {
+        const btn = document.getElementById(`head-filter-${m}`);
+        if (!btn) return;
+        if (m === mode) {
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm shadow-blue-600/20 transition cursor-pointer';
+        } else {
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition cursor-pointer';
+        }
+      });
+      renderProdHeadView();
+    }
+
+    function renderProdHeadView() {
+      const day = dbState.days[activeDateId];
+      document.getElementById('head-jam-mulai').value = day.jamMulai || '07:30';
+      document.getElementById('head-jam-selesai').value = day.jamSelesai || '15:00';
+
+      const listEl = document.getElementById('head-workers-list');
+      const items = PRODUCTION_WORKERS.filter((w) => {
+        const lolos = Number(day.workers?.[String(w.index)]?.lolos) || 0;
+        if (headFilterMode === 'below') return lolos < 10;
+        if (headFilterMode === 'met') return lolos >= 10;
+        return true;
+      });
+
+      listEl.innerHTML = items
+        .map((w) => {
+          const data = day.workers?.[String(w.index)] || { lolos: 0, reject: 0 };
+          const lolos = Number(data.lolos) || 0;
+          const reject = Number(data.reject) || 0;
+          const isKkm = lolos >= 10;
+
+          return `
+            <div class="p-3.5 rounded-xl bg-white border ${
+              isKkm ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200/90'
+            } flex items-center justify-between shadow-sm transition">
+              <div>
+                <div class="text-xs sm:text-sm font-bold text-slate-900">#${w.presensi} ${w.name}</div>
+                <div class="text-[11px] font-mono-num font-medium ${isKkm ? 'text-emerald-600' : 'text-slate-400'}">
+                  ${isKkm ? 'Target 10 pcs Tercapai' : 'Belum Target (<10 pcs)'}
+                </div>
+              </div>
+              <div class="text-right font-mono-num">
+                <div class="text-sm font-bold text-emerald-600">${lolos} <span class="text-[10px] text-slate-400">lolos</span></div>
+                <div class="text-xs font-semibold text-rose-600">${reject} <span class="text-[10px] text-slate-400">rej</span></div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderPackingView() {
+      const day = dbState.days[activeDateId];
+      const totalLolos = getTotalLolosDay(activeDateId);
+      const ikatRec = Math.floor(totalLolos / 5);
+      const sisaPcs = totalLolos % 5;
+
+      document.getElementById('pack-total-lolos').textContent = `${totalLolos} pcs`;
+      document.getElementById('pack-calc-ikat').textContent = `${ikatRec} Ikat`;
+      document.getElementById('pack-calc-sisa').textContent = `Sisa: ${sisaPcs} pcs`;
+      document.getElementById('pack-verified-input').value = Number(day.packingVerified) || 0;
+    }
+
+    function renderFiveRView() {
+      const day = dbState.days[activeDateId];
+      const arr = Array.isArray(day.fiveR) ? day.fiveR : [false, false, false, false, false];
+      const container = document.getElementById('field-5r-cards');
+
+      container.innerHTML = FIVE_R_LABELS.map((label, idx) => {
+        const checked = Boolean(arr[idx]);
+        return `
+          <button
+            type="button"
+            onclick="toggleFieldFiveR(${idx})"
+            class="p-3.5 rounded-xl border text-center transition-all active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+              checked
+                ? 'bg-teal-50 border-teal-400 text-teal-800 shadow-sm shadow-teal-500/10'
+                : 'bg-white border-slate-200/90 text-slate-500 hover:border-slate-300'
+            }"
+          >
+            <i data-lucide="${checked ? 'check-square' : 'square'}" class="w-5 h-5 ${
+              checked ? 'text-teal-600' : 'text-slate-300'
+            }"></i>
+            <span class="text-xs font-bold">${label}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('field-5r-note').value = day.catatan5R || '';
+    }
+
+    function toggleFieldFiveR(idx) {
+      const arr = [...(dbState.days[activeDateId].fiveR || [false, false, false, false, false])];
+      arr[idx] = !arr[idx];
+      dbState.days[activeDateId].fiveR = arr;
+      saveDb(`5R ${FIVE_R_LABELS[idx]} diperbarui`);
+    }
+
+    function renderWorkerView() {
+      const day = dbState.days[activeDateId];
+      const wIdx = activeUser.workerIndex ?? 0;
+      const wData = day.workers?.[String(wIdx)] || { lolos: 0, reject: 0 };
+      const lolos = Number(wData.lolos) || 0;
+      const reject = Number(wData.reject) || 0;
+
+      document.getElementById('worker-card-name').textContent = `#${activeUser.presensi} ${activeUser.name}`;
+      document.getElementById('worker-stat-lolos').textContent = lolos;
+      document.getElementById('worker-stat-reject').textContent = reject;
+      document.getElementById('worker-stat-prod').textContent = ((lolos / 15) * 100).toFixed(1) + '%';
+
+      const grade = getGradeInfo(lolos, reject);
+      const badgeEl = document.getElementById('worker-grade-badge');
+      badgeEl.textContent = grade.label;
+      badgeEl.className = `inline-block mt-1 px-3 py-1 rounded-lg text-sm font-mono-num font-bold ${grade.cls}`;
+
+      const alertEl = document.getElementById('worker-reject-alert');
+      if (reject > 0) alertEl.classList.remove('hidden');
+      else alertEl.classList.add('hidden');
+
+      const pctBar = Math.min(100, Math.round((lolos / 15) * 100));
+      const barEl = document.getElementById('worker-progress-bar');
+      const msgEl = document.getElementById('worker-cheer-message');
+      document.getElementById('worker-progress-label').textContent = `${lolos} / 10 pcs`;
+
+      barEl.style.width = `${pctBar}%`;
+
+      if (lolos < 10) {
+        barEl.className = 'h-full rounded-full transition-all duration-500 bg-amber-500';
+        msgEl.className = 'text-xs font-semibold text-amber-700';
+        msgEl.textContent = 'Target 10 pcs per anggota belum tercapai (KKM = 76).';
+      } else if (lolos === 10 && reject === 0) {
+        barEl.className = 'h-full rounded-full transition-all duration-500 bg-teal-500';
+        msgEl.className = 'text-xs font-semibold text-teal-700';
+        msgEl.textContent = 'Sesuai target tanpa reject (Nilai 86).';
+      } else if (lolos > 10 && reject === 0) {
+        barEl.className = 'h-full rounded-full transition-all duration-500 bg-emerald-600';
+        msgEl.className = 'text-xs font-semibold text-emerald-700';
+        msgEl.textContent = 'Melebihi target tanpa reject (Nilai 100).';
+      } else {
+        barEl.className = 'h-full rounded-full transition-all duration-500 bg-blue-600';
+        msgEl.className = 'text-xs font-semibold text-blue-700';
+        msgEl.textContent = 'Target tercapai; selesaikan revisi unit reject.';
+      }
+
+      const totalClassLolos = getTotalLolosDay(activeDateId);
+      const targetKelas = Number(dbState.meta.targetHarianKelas) || 230;
+      const classPct = Math.min(100, Math.round((totalClassLolos / targetKelas) * 100));
+      document.getElementById('class-target-pct-text').textContent = `${classPct}%`;
+      document.getElementById('class-target-bar').style.width = `${classPct}%`;
+      document.getElementById('class-target-achieved').textContent = `${totalClassLolos} pcs`;
+      document.getElementById('class-target-goal').textContent = `${targetKelas} pcs`;
+
+      const ranked = PRODUCTION_WORKERS.map((w) => ({
+        ...w,
+        lolos: Number(day.workers?.[String(w.index)]?.lolos) || 0,
+      }))
+        .sort((a, b) => b.lolos - a.lolos || a.index - b.index)
+        .slice(0, 3);
+
+      const medals = ['#1', '#2', '#3'];
+      document.getElementById('worker-podium-list').innerHTML = ranked
+        .map(
+          (item, i) => `
+          <div class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-white border border-slate-200/80 text-xs shadow-sm">
+            <div class="flex items-center gap-2">
+              <span class="font-mono-num font-bold text-amber-600">${medals[i]}</span>
+              <span class="font-bold text-slate-800">#${item.presensi} ${item.name}</span>
+            </div>
+            <span class="font-mono-num font-bold text-emerald-600">${item.lolos} pcs</span>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className =
+        'px-4 py-2.5 rounded-xl bg-slate-900 text-white border border-slate-800 text-xs font-semibold shadow-xl flex items-center gap-2 transition-all duration-300 animate-enter';
+      el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>${msg}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(6px)';
+        setTimeout(() => el.remove(), 300);
+      }, 2000);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      updateClock();
-      setInterval(updateClock, 1000);
+      updateLoginClock();
+      populatePersonnelDropdown();
+      updateConnectionUI();
+      initDatabase();
+      restorePortalSession();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     });
   </script>
