@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEFA Andon Board Proyektor — SMK Negeri 3 Yogyakarta (Kelas X TE 2)</title>
+  <title>TEFA Display — X TE 2</title>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,30 +35,53 @@
 
   <style>
     body {
-      background-color: #0B0F17;
-      color: #F1F5F9;
+      background-color: #090D16;
+      color: #F8FAFC;
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     }
     .font-mono-num {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
     }
-    @keyframes subtlePulseBorder {
+    @keyframes flashGreen {
       0% {
-        border-color: rgba(16, 185, 129, 0.9);
-        background-color: rgba(16, 185, 129, 0.06);
+        border-color: #10B981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
       }
       100% {
-        border-color: rgba(30, 41, 59, 0.8);
-        background-color: #111622;
+        border-color: rgba(51, 65, 85, 0.65);
+        box-shadow: none;
       }
     }
     .hero-flash-active {
-      animation: subtlePulseBorder 1.4s ease-out forwards;
+      animation: flashGreen 1.2s ease-out forwards;
+    }
+
+    @keyframes pulseBorderRed {
+      0%, 100% {
+        box-shadow: 0 12px 32px rgba(225, 29, 72, 0.35), 0 0 0 1.5px rgba(244, 63, 94, 0.75);
+      }
+      50% {
+        box-shadow: 0 16px 40px rgba(225, 29, 72, 0.55), 0 0 0 3px rgba(244, 63, 94, 1);
+      }
+    }
+
+    /* Transisi halus saat buka & tutup sidebar reject */
+    #reject-alert-sidebar {
+      transform: translateX(120%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease;
+    }
+    #reject-alert-sidebar.sidebar-open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      animation: pulseBorderRed 1.8s ease-in-out infinite;
     }
   </style>
 </head>
-<body class="min-h-screen bg-[#0B0F17] text-slate-200 antialiased flex flex-col justify-between overflow-x-hidden">
+<body class="min-h-screen bg-[#090D16] text-slate-100 antialiased flex flex-col justify-between overflow-x-hidden select-none">
 
   <!-- FIREBASE CONFIGURATION -->
   <script>
@@ -74,31 +97,28 @@
     };
   </script>
 
-  <!-- 1. HEADER ATAS MINIMALIS -->
-  <header class="border-b border-slate-800/70 bg-[#0B0F17]/95 px-4 lg:px-8 py-3">
-    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex flex-wrap items-center gap-3">
-        <span class="inline-flex items-center gap-2 text-xs font-mono-num font-semibold text-emerald-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          TEFA SMKN 3 YOGYAKARTA
-        </span>
-        <span id="header-kelas-ruang" class="text-xs font-mono-num text-slate-300 bg-[#111622] px-2.5 py-1 rounded-lg border border-slate-800/70">
+  <!-- 1. HEADER BERSIH & TEGAS -->
+  <header class="border-b border-slate-800/80 bg-[#0D1320] px-5 lg:px-8 py-3.5">
+    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Identitas Kelas -->
+      <div class="flex items-center gap-3">
+        <span id="live-dot" class="w-3 h-3 rounded-full bg-emerald-400"></span>
+        <span id="header-kelas-ruang" class="text-base sm:text-lg font-extrabold tracking-wide text-white">
           X TE 2 • Ruang 84
-        </span>
-        <span class="text-xs text-slate-500 hidden sm:inline">
-          PT YPTI • Songsong Helm Latih
         </span>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center gap-1 bg-[#111622] p-1 rounded-xl border border-slate-800/70" id="projector-date-buttons"></div>
+      <!-- Navigasi Tanggal & Mode -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center gap-1 bg-[#090D16] p-1 rounded-xl border border-slate-800" id="projector-date-buttons"></div>
 
-        <div class="flex items-center gap-1 bg-[#111622] p-1 rounded-xl border border-slate-800/70">
+        <div class="flex items-center gap-1 bg-[#090D16] p-1 rounded-xl border border-slate-800">
           <button
             id="mode-daily-btn"
             type="button"
             onclick="setDisplayMode('daily')"
-            class="px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-emerald-500 text-slate-950"
+            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-emerald-500 text-slate-950"
           >
             Harian
           </button>
@@ -106,156 +126,197 @@
             id="mode-cumulative-btn"
             type="button"
             onclick="setDisplayMode('cumulative')"
-            class="px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer text-slate-400 hover:text-white"
+            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer text-slate-400 hover:text-white"
           >
-            Kumulatif 4 Hari
+            4 Hari
           </button>
         </div>
       </div>
 
+      <!-- Jam & Fullscreen -->
       <div class="flex items-center gap-2.5">
-        <div id="live-clock" class="px-3 py-1 rounded-xl bg-[#111622] border border-slate-800/70 font-mono-num text-sm font-semibold text-white">
+        <div id="live-clock" class="px-4 py-1.5 rounded-xl bg-[#090D16] border border-slate-800 font-mono-num text-base sm:text-lg font-bold text-white">
           00:00:00
         </div>
-
-        <span id="conn-status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-num text-amber-400 bg-amber-500/10">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          <span>LOCAL MODE</span>
-        </span>
 
         <button
           type="button"
           onclick="toggleFullscreen()"
-          title="Fullscreen"
-          class="p-2 rounded-xl bg-[#111622] hover:bg-slate-800 text-slate-300 border border-slate-800/70 transition cursor-pointer"
+          title="Layar Penuh"
+          class="p-2.5 rounded-xl bg-[#090D16] hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer"
         >
-          <i data-lucide="maximize" class="w-4 h-4"></i>
+          <i data-lucide="maximize" class="w-5 h-5"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- 2. AREA UTAMA LAYAR PROYEKTOR -->
-  <main class="flex-1 max-w-[1800px] w-full mx-auto px-4 lg:px-8 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+  <!-- 2. AREA UTAMA PROYEKTOR -->
+  <main class="flex-1 max-w-[1800px] w-full mx-auto px-5 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
-    <!-- KOLOM KIRI (7 KOLOM) -->
-    <section class="lg:col-span-7 flex flex-col justify-between gap-5">
+    <!-- KOLOM KIRI (7 KOLOM): ANGKA UTAMA & RINGKASAN -->
+    <section class="lg:col-span-7 flex flex-col justify-between gap-6">
+      
+      <!-- KARTU HERO LOLOS QC -->
       <div
         id="hero-lolos-card"
-        class="flex-1 rounded-3xl bg-[#111622] border border-slate-800/80 p-6 lg:p-10 flex flex-col justify-between transition-all"
+        class="flex-1 rounded-3xl bg-[#121826] border border-slate-800/80 p-7 lg:p-10 flex flex-col justify-between transition-all"
       >
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h1 class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-emerald-400">
-            Total Produk Lolos QC
-          </h1>
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-emerald-400">
+            Lolos QC
+          </span>
 
-          <div class="flex items-center gap-2">
-            <span id="delta-lolos-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-mono-num font-bold bg-emerald-500 text-slate-950">
-              +1 UNIT LOLOS
+          <div class="flex items-center gap-2.5">
+            <span id="delta-lolos-badge" class="hidden px-3 py-1 rounded-full text-xs sm:text-sm font-mono-num font-extrabold bg-emerald-500 text-slate-950">
+              +1 LOLOS
             </span>
-            <span id="scope-label-badge" class="px-3 py-1 rounded-full text-xs font-mono-num text-slate-400 bg-[#0B0F17]">
-              23 NOVEMBER 2026
+            <span id="scope-label-badge" class="px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono-num font-bold text-slate-300 bg-[#090D16] border border-slate-800">
+              23 NOV 2026
             </span>
           </div>
         </div>
 
+        <!-- Angka Utama Besar -->
         <div class="my-6 flex items-baseline justify-center gap-4">
           <div
             id="hero-lolos-number"
-            class="font-mono-num font-extrabold tracking-tight text-white text-8xl sm:text-9xl xl:text-[10.5rem] leading-none select-none"
+            class="font-mono-num font-extrabold tracking-tight text-white text-8xl sm:text-9xl xl:text-[11rem] leading-none"
           >
             0
           </div>
-          <span class="text-2xl sm:text-3xl font-mono-num font-semibold text-emerald-400">
+          <span class="text-2xl sm:text-4xl font-mono-num font-bold text-emerald-400">
             pcs
           </span>
         </div>
 
-        <div class="space-y-2.5 pt-4 border-t border-slate-800/60">
-          <div class="flex items-center justify-between text-xs sm:text-sm font-mono-num">
-            <span id="target-progress-title" class="text-slate-400">Capaian Target Harian</span>
-            <span id="target-progress-stats" class="font-semibold text-emerald-400">0 / 230 pcs (0%)</span>
+        <!-- Progress Target -->
+        <div class="space-y-3 pt-5 border-t border-slate-800/80">
+          <div class="flex items-center justify-between text-sm sm:text-base font-mono-num">
+            <span id="target-progress-title" class="font-semibold text-slate-300">Target Harian</span>
+            <span id="target-progress-stats" class="font-extrabold text-emerald-400">0 / 230 pcs (0%)</span>
           </div>
-          <div class="w-full h-3 rounded-full bg-[#0B0F17] overflow-hidden">
+          <div class="w-full h-4 rounded-full bg-[#090D16] p-0.5 border border-slate-800/80 overflow-hidden">
             <div
               id="target-progress-bar"
-              class="h-full bg-emerald-500 transition-all duration-500"
+              class="h-full rounded-full bg-emerald-500 transition-all duration-500"
               style="width: 0%;"
             ></div>
           </div>
         </div>
       </div>
 
+      <!-- 3 KPI BAWAH -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-5">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Total Reject</span>
-            <i data-lucide="x-circle" class="w-4 h-4 text-red-400/80"></i>
+        <div class="rounded-2xl bg-[#121826] border border-slate-800/80 p-5">
+          <div class="flex items-center justify-between text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">
+            <span>Reject</span>
+            <i data-lucide="x-circle" class="w-5 h-5 text-rose-400"></i>
           </div>
-          <div id="kpi-reject-val" class="text-3xl font-mono-num font-bold text-red-400 mt-2">0</div>
-          <div id="kpi-reject-ratio" class="text-xs font-mono-num text-slate-500 mt-1">Rasio: 0.0%</div>
+          <div id="kpi-reject-val" class="text-3xl sm:text-4xl font-mono-num font-extrabold text-rose-400 mt-2">0</div>
+          <div id="kpi-reject-ratio" class="text-xs sm:text-sm font-mono-num font-semibold text-slate-400 mt-1">Rasio 0.0%</div>
         </div>
 
-        <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-5">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Dikemas (@5 pcs)</span>
-            <i data-lucide="package" class="w-4 h-4 text-sky-400/80"></i>
+        <div class="rounded-2xl bg-[#121826] border border-slate-800/80 p-5">
+          <div class="flex items-center justify-between text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">
+            <span>Packing</span>
+            <i data-lucide="package" class="w-5 h-5 text-sky-400"></i>
           </div>
-          <div id="kpi-packing-ikat" class="text-3xl font-mono-num font-bold text-sky-400 mt-2">0 Ikat</div>
-          <div id="kpi-packing-sisa" class="text-xs font-mono-num text-slate-500 mt-1">Sisa: 0 pcs</div>
+          <div id="kpi-packing-ikat" class="text-3xl sm:text-4xl font-mono-num font-extrabold text-sky-400 mt-2">0 Ikat</div>
+          <div id="kpi-packing-sisa" class="text-xs sm:text-sm font-mono-num font-semibold text-slate-400 mt-1">Sisa 0 pcs</div>
         </div>
 
-        <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-5">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Kehadiran Tim</span>
-            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+        <div class="rounded-2xl bg-[#121826] border border-slate-800/80 p-5">
+          <div class="flex items-center justify-between text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">
+            <span>Hadir</span>
+            <i data-lucide="users" class="w-5 h-5 text-amber-400"></i>
           </div>
-          <div id="kpi-attendance-val" class="text-3xl font-mono-num font-bold text-white mt-2">0 / 35</div>
-          <div class="text-xs text-slate-500 mt-1">Presensi #1–#35</div>
+          <div id="kpi-attendance-val" class="text-3xl sm:text-4xl font-mono-num font-extrabold text-white mt-2">0 / 35</div>
+          <div class="text-xs sm:text-sm font-semibold text-slate-400 mt-1">Siswa</div>
         </div>
       </div>
     </section>
 
-    <!-- KOLOM KANAN (5 KOLOM) -->
-    <section class="lg:col-span-5 flex flex-col justify-between gap-5">
+    <!-- KOLOM KANAN (5 KOLOM): PERINGKAT & REVISI -->
+    <section class="lg:col-span-5 flex flex-col justify-between gap-6">
 
-      <div class="flex-1 rounded-3xl bg-[#111622] border border-slate-800/80 p-6 flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-2 mb-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
-            <span>Top 3 Pekerja Tercepat</span>
+      <!-- TOP 3 PERINGKAT -->
+      <div class="flex-1 rounded-3xl bg-[#121826] border border-slate-800/80 p-6 lg:p-7 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-5">
+          <h2 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-white flex items-center gap-2.5">
+            <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
+            <span>Peringkat Tercepat</span>
           </h2>
-          <span class="text-xs font-mono-num text-slate-500">Target 10 pcs</span>
         </div>
 
-        <div id="top3-podium-container" class="space-y-3 my-auto"></div>
+        <div id="top3-podium-container" class="flex-1 flex flex-col justify-center space-y-3.5"></div>
       </div>
 
-      <div class="rounded-3xl bg-[#111622] border border-slate-800/80 p-6">
-        <div class="flex items-center justify-between gap-2 mb-3">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
-            <span>Perlu Revisi (Reject)</span>
+      <!-- DAFTAR REJECT AKTIF -->
+      <div class="rounded-3xl bg-[#121826] border border-slate-800/80 p-6 lg:p-7">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <h2 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-white flex items-center gap-2.5">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400"></i>
+            <span>Catatan Reject</span>
           </h2>
-          <span id="reject-board-count" class="text-xs font-mono-num text-slate-400">0 Pekerja</span>
+          <span id="reject-board-count" class="text-xs sm:text-sm font-mono-num font-bold text-slate-400">0 Siswa</span>
         </div>
 
-        <div id="reject-board-content" class="min-h-[64px] flex flex-wrap items-center gap-2"></div>
+        <div id="reject-board-content" class="min-h-[68px] flex flex-wrap items-center gap-2.5"></div>
       </div>
 
     </section>
   </main>
 
-  <!-- 3. JAVASCRIPT LOGIC -->
+  <!-- 3. SIDEBAR NOTIFIKASI REJECT (RAMPING & ANIMASI SLIDE IN/OUT) -->
+  <aside
+    id="reject-alert-sidebar"
+    class="fixed top-20 right-6 w-[calc(100%-3rem)] max-w-sm z-50 rounded-2xl bg-[#190B10]/95 backdrop-blur-md border-2 border-rose-500 p-5"
+  >
+    <div class="flex items-center justify-between gap-3 pb-3 border-b border-rose-500/30">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/50 flex items-center justify-center text-rose-400 shrink-0">
+          <i data-lucide="octagon-alert" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-[11px] font-mono-num font-bold uppercase tracking-wider text-rose-400">
+            Peringatan QC
+          </div>
+          <h3 class="text-lg font-extrabold text-white leading-tight">
+            REJECT TERDETEKSI
+          </h3>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="reject-alert-timer" class="text-xs font-mono-num font-bold text-rose-300 bg-rose-500/15 px-2 py-1 rounded-lg">
+          8d
+        </span>
+        <button
+          type="button"
+          onclick="dismissRejectSidebar()"
+          class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-300 transition cursor-pointer"
+          title="Tutup"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Daftar Siswa yang Baru Kena Reject -->
+    <div id="reject-alert-list" class="mt-3.5 space-y-2.5 max-h-[45vh] overflow-y-auto pr-0.5"></div>
+  </aside>
+
+  <!-- 4. JAVASCRIPT LOGIC -->
   <script>
     const ROOT_REF_PATH = 'tefa_songsong';
     const LOCAL_STORAGE_KEY = 'tefa_songsong_v1_data';
 
     const SCHEDULE_DAYS = [
-      { id: '2026-11-23', short: '23 Nov', full: '23 NOVEMBER 2026' },
-      { id: '2026-11-24', short: '24 Nov', full: '24 NOVEMBER 2026' },
-      { id: '2026-11-26', short: '26 Nov', full: '26 NOVEMBER 2026' },
-      { id: '2026-11-27', short: '27 Nov', full: '27 NOVEMBER 2026' },
+      { id: '2026-11-23', short: '23 Nov', full: '23 NOV 2026' },
+      { id: '2026-11-24', short: '24 Nov', full: '24 NOV 2026' },
+      { id: '2026-11-26', short: '26 Nov', full: '26 NOV 2026' },
+      { id: '2026-11-27', short: '27 Nov', full: '27 NOV 2026' },
     ];
 
     const ALL_35_PINS = [
@@ -293,11 +354,13 @@
       { index: 22, presensi: 35, name: 'Hafidz', pin: '2023' },
     ];
 
-    let isFirebaseLive = false;
     let activeDateId = SCHEDULE_DAYS[0].id;
     let displayMode = 'daily';
     let prevHeroLolos = null;
+    let prevWorkerRejectMap = null;
     let flashTimeout = null;
+    let rejectSidebarTimeout = null;
+    let rejectCountdownInterval = null;
     let wakeLock = null;
 
     function createDefaultDay() {
@@ -403,20 +466,12 @@
       );
     }
 
-    function updateConnectionBadge() {
-      const badge = document.getElementById('conn-status-badge');
-      if (!badge) return;
-      if (isFirebaseLive) {
-        badge.className =
-          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-num text-emerald-400 bg-emerald-500/10';
-        badge.innerHTML =
-          '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>LIVE FIREBASE</span>';
-      } else {
-        badge.className =
-          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono-num text-amber-400 bg-amber-500/10';
-        badge.innerHTML =
-          '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>LOCAL MODE</span>';
-      }
+    function setLiveIndicator(live) {
+      const dot = document.getElementById('live-dot');
+      if (!dot) return;
+      dot.className = live
+        ? 'w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]'
+        : 'w-3 h-3 rounded-full bg-amber-400';
     }
 
     function initRealtimeBoard() {
@@ -424,8 +479,7 @@
         try {
           if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
           const ref = firebase.database().ref(ROOT_REF_PATH);
-          isFirebaseLive = true;
-          updateConnectionBadge();
+          setLiveIndicator(true);
 
           ref.on(
             'value',
@@ -440,8 +494,7 @@
               renderBoard();
             },
             () => {
-              isFirebaseLive = false;
-              updateConnectionBadge();
+              setLiveIndicator(false);
               renderBoard();
             }
           );
@@ -449,8 +502,7 @@
         } catch (_) {}
       }
 
-      isFirebaseLive = false;
-      updateConnectionBadge();
+      setLiveIndicator(false);
       renderBoard();
     }
 
@@ -501,7 +553,7 @@
 
         return {
           scopeText: activeDayObj.full,
-          progressTitle: 'Capaian Target Harian',
+          progressTitle: 'Target Harian',
           targetGoal: targetDaily,
           totalLolos,
           totalReject,
@@ -532,8 +584,8 @@
       const avgHadir = Math.round(hadirSum / SCHEDULE_DAYS.length);
 
       return {
-        scopeText: 'KUMULATIF 4 HARI KERJA',
-        progressTitle: 'Capaian Target Kumulatif 4 Hari',
+        scopeText: 'KUMULATIF 4 HARI',
+        progressTitle: 'Target 4 Hari',
         targetGoal: targetDaily * 4,
         totalLolos,
         totalReject,
@@ -546,11 +598,71 @@
       const l = Number(lolos) || 0;
       const r = Number(reject) || 0;
 
-      if (l < 10) return { label: 'Tidak KKM', cls: 'bg-[#0B0F17] text-slate-400' };
-      if (l > 10 && r === 0) return { label: '100', cls: 'bg-emerald-500/10 text-emerald-400' };
-      if (l > 10 && r > 0) return { label: '96', cls: 'bg-sky-500/10 text-sky-400' };
-      if (l === 10 && r === 0) return { label: '86', cls: 'bg-teal-500/10 text-teal-300' };
-      return { label: '76', cls: 'bg-amber-500/10 text-amber-300' };
+      if (l < 10) return { label: 'Belum KKM', cls: 'bg-slate-800 text-slate-300' };
+      if (l > 10 && r === 0) return { label: 'Nilai 100', cls: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' };
+      if (l > 10 && r > 0) return { label: 'Nilai 96', cls: 'bg-sky-500/20 text-sky-300 border border-sky-500/40' };
+      if (l === 10 && r === 0) return { label: 'Nilai 86', cls: 'bg-teal-500/20 text-teal-300 border border-teal-500/40' };
+      return { label: 'Nilai 76', cls: 'bg-amber-500/20 text-amber-300 border border-amber-500/40' };
+    }
+
+    /* NOTIFIKASI SIDEBAR RAMPING DENGAN ANIMASI SLIDE IN & SLIDE OUT */
+    function triggerRejectSidebar(newlyRejectedWorkers) {
+      const sidebar = document.getElementById('reject-alert-sidebar');
+      const listEl = document.getElementById('reject-alert-list');
+      const timerEl = document.getElementById('reject-alert-timer');
+      if (!sidebar || !listEl) return;
+
+      listEl.innerHTML = newlyRejectedWorkers
+        .map(
+          (w) => `
+          <div class="rounded-xl bg-rose-500/15 border border-rose-500/40 px-4 py-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-base sm:text-lg font-extrabold text-white truncate">
+                #${w.presensi} ${w.name}
+              </div>
+              <div class="text-xs font-mono-num text-rose-300 mt-0.5">
+                Total Reject: ${w.totalReject} pcs
+              </div>
+            </div>
+            <div class="shrink-0 px-3 py-1.5 rounded-xl bg-rose-600 text-white font-mono-num font-extrabold text-base sm:text-lg">
+              +${w.added}
+            </div>
+          </div>
+        `
+        )
+        .join('');
+
+      sidebar.classList.add('sidebar-open');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      if (rejectSidebarTimeout) clearTimeout(rejectSidebarTimeout);
+      if (rejectCountdownInterval) clearInterval(rejectCountdownInterval);
+
+      let secondsLeft = 8;
+      if (timerEl) timerEl.textContent = `${secondsLeft}d`;
+
+      rejectCountdownInterval = setInterval(() => {
+        secondsLeft -= 1;
+        if (secondsLeft > 0 && timerEl) {
+          timerEl.textContent = `${secondsLeft}d`;
+        } else {
+          clearInterval(rejectCountdownInterval);
+        }
+      }, 1000);
+
+      rejectSidebarTimeout = setTimeout(() => {
+        dismissRejectSidebar();
+      }, 8000);
+    }
+
+    function dismissRejectSidebar() {
+      const sidebar = document.getElementById('reject-alert-sidebar');
+      if (sidebar) {
+        sidebar.classList.remove('sidebar-open');
+      }
+      if (rejectSidebarTimeout) clearTimeout(rejectSidebarTimeout);
+      if (rejectCountdownInterval) clearInterval(rejectCountdownInterval);
     }
 
     function renderBoard() {
@@ -563,7 +675,7 @@
           <button
             type="button"
             onclick="selectProjectorDate('${d.id}')"
-            class="px-2.5 py-1 rounded-lg text-xs font-mono-num font-semibold transition cursor-pointer ${
+            class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-mono-num font-bold transition cursor-pointer ${
               active ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
             }"
           >
@@ -575,22 +687,46 @@
       const dailyBtn = document.getElementById('mode-daily-btn');
       const cumBtn = document.getElementById('mode-cumulative-btn');
       if (displayMode === 'daily') {
-        dailyBtn.className = 'px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-emerald-500 text-slate-950';
-        cumBtn.className = 'px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer text-slate-400 hover:text-white';
+        dailyBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-emerald-500 text-slate-950';
+        cumBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer text-slate-400 hover:text-white';
       } else {
-        cumBtn.className = 'px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer bg-emerald-500 text-slate-950';
-        dailyBtn.className = 'px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer text-slate-400 hover:text-white';
+        cumBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer bg-emerald-500 text-slate-950';
+        dailyBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer text-slate-400 hover:text-white';
       }
 
       const agg = getAggregatedData();
 
+      /* Deteksi kenaikan reject per siswa untuk memunculkan Sidebar Notifikasi */
+      if (prevWorkerRejectMap !== null) {
+        const newRejects = [];
+        agg.workerStats.forEach((w) => {
+          const oldRej = prevWorkerRejectMap[w.index] ?? 0;
+          if (w.reject > oldRej) {
+            newRejects.push({
+              presensi: w.presensi,
+              name: w.name,
+              added: w.reject - oldRej,
+              totalReject: w.reject,
+            });
+          }
+        });
+        if (newRejects.length > 0) {
+          triggerRejectSidebar(newRejects);
+        }
+      }
+      prevWorkerRejectMap = {};
+      agg.workerStats.forEach((w) => {
+        prevWorkerRejectMap[w.index] = w.reject;
+      });
+
+      /* Efek kilat saat angka lolos naik */
       const heroNumEl = document.getElementById('hero-lolos-number');
       const heroCardEl = document.getElementById('hero-lolos-card');
       const deltaBadge = document.getElementById('delta-lolos-badge');
 
       if (prevHeroLolos !== null && agg.totalLolos > prevHeroLolos) {
         const diff = agg.totalLolos - prevHeroLolos;
-        deltaBadge.textContent = `+${diff} UNIT LOLOS`;
+        deltaBadge.textContent = `+${diff} LOLOS`;
         deltaBadge.classList.remove('hidden');
 
         heroCardEl.classList.remove('hero-flash-active');
@@ -601,7 +737,7 @@
         flashTimeout = setTimeout(() => {
           deltaBadge.classList.add('hidden');
           heroCardEl.classList.remove('hero-flash-active');
-        }, 1400);
+        }, 1200);
       }
       prevHeroLolos = agg.totalLolos;
 
@@ -618,69 +754,99 @@
       const totalProcessed = agg.totalLolos + agg.totalReject;
       const rejectRatio = totalProcessed > 0 ? ((agg.totalReject / totalProcessed) * 100).toFixed(1) : '0.0';
       document.getElementById('kpi-reject-val').textContent = agg.totalReject;
-      document.getElementById('kpi-reject-ratio').textContent = `Rasio: ${rejectRatio}%`;
+      document.getElementById('kpi-reject-ratio').textContent = `Rasio ${rejectRatio}%`;
 
       const ikatCount = Math.floor(agg.totalLolos / 5);
       const sisaPcs = agg.totalLolos % 5;
       document.getElementById('kpi-packing-ikat').textContent = `${ikatCount} Ikat`;
-      document.getElementById('kpi-packing-sisa').textContent = `Sisa: ${sisaPcs} pcs`;
+      document.getElementById('kpi-packing-sisa').textContent = `Sisa ${sisaPcs} pcs`;
 
       document.getElementById('kpi-attendance-val').textContent = `${agg.hadirCount} / 35`;
 
-      const sortedWorkers = [...agg.workerStats].sort(
-        (a, b) => b.lolos - a.lolos || a.reject - b.reject || a.index - b.index
-      );
-      const top3 = sortedWorkers.slice(0, 3);
+      /* Peringkat Top 3: Kosong di awal jika belum ada satupun anak dengan lolos > 0 */
+      const activeProducers = agg.workerStats
+        .filter((w) => w.lolos > 0)
+        .sort((a, b) => b.lolos - a.lolos || a.reject - b.reject || a.index - b.index);
 
-      const podiumLabels = ['Peringkat 1', 'Peringkat 2', 'Peringkat 3'];
-      const podiumAccents = ['text-amber-400', 'text-slate-300', 'text-orange-400'];
+      const podiumContainer = document.getElementById('top3-podium-container');
 
-      document.getElementById('top3-podium-container').innerHTML = top3
-        .map((w, idx) => {
-          const prodStr = ((w.lolos / 15) * 100).toFixed(1) + '%';
-          const konversi = getKonversiNilai(w.lolos, w.reject);
-
-          return `
-            <div class="rounded-2xl bg-[#0B0F17] border border-slate-800/70 p-4 flex items-center justify-between gap-3">
-              <div class="min-w-0">
-                <div class="text-[11px] font-mono-num font-semibold ${podiumAccents[idx]}">
-                  ${podiumLabels[idx]}
-                </div>
-                <div class="text-lg font-bold text-white truncate mt-0.5">#${w.presensi} ${w.name}</div>
-                <div class="text-xs font-mono-num text-slate-400 mt-0.5">
-                  Prod ${prodStr} • Rej <span class="${w.reject > 0 ? 'text-red-400' : 'text-slate-500'}">${w.reject}</span>
-                </div>
-              </div>
-
-              <div class="text-right shrink-0">
-                <div class="text-2xl font-mono-num font-bold text-emerald-400">
-                  ${w.lolos} <span class="text-xs font-normal text-slate-500">pcs</span>
-                </div>
-                <span class="inline-block mt-1 px-2.5 py-0.5 rounded-md text-xs font-mono-num font-semibold ${konversi.cls}">
-                  Nilai ${konversi.label}
-                </span>
-              </div>
+      if (activeProducers.length === 0) {
+        podiumContainer.innerHTML = `
+          <div class="rounded-2xl bg-[#090D16] border border-dashed border-slate-800 p-8 text-center my-auto">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-800/70 text-slate-400 mb-3">
+              <i data-lucide="hourglass" class="w-6 h-6"></i>
             </div>
-          `;
-        })
-        .join('');
+            <div class="text-base sm:text-lg font-bold text-slate-300">
+              Belum Ada Peringkat
+            </div>
+            <div class="text-xs sm:text-sm text-slate-500 mt-1">
+              Menunggu data lolos QC pertama
+            </div>
+          </div>
+        `;
+      } else {
+        const top3 = activeProducers.slice(0, 3);
+        const rankStyles = [
+          { badge: 'bg-amber-400 text-slate-950', border: 'border-amber-400/50', label: '#1' },
+          { badge: 'bg-slate-300 text-slate-950', border: 'border-slate-500/50', label: '#2' },
+          { badge: 'bg-orange-400 text-slate-950', border: 'border-orange-400/50', label: '#3' },
+        ];
 
-      const rejectWorkers = agg.workerStats.filter((w) => w.reject > 0);
-      document.getElementById('reject-board-count').textContent = `${rejectWorkers.length} Pekerja`;
+        podiumContainer.innerHTML = top3
+          .map((w, idx) => {
+            const konversi = getKonversiNilai(w.lolos, w.reject);
+            const st = rankStyles[idx];
+
+            return `
+              <div class="rounded-2xl bg-[#090D16] border ${st.border} p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <span class="w-10 h-10 rounded-xl font-mono-num font-extrabold text-base flex items-center justify-center shrink-0 ${st.badge}">
+                    ${st.label}
+                  </span>
+                  <div class="min-w-0">
+                    <div class="text-lg sm:text-xl font-extrabold text-white truncate">
+                      #${w.presensi} ${w.name}
+                    </div>
+                    <div class="text-xs sm:text-sm font-mono-num text-slate-400 mt-0.5">
+                      Reject: <span class="${w.reject > 0 ? 'text-rose-400 font-bold' : 'text-slate-400'}">${w.reject}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-right shrink-0">
+                  <div class="text-2xl sm:text-3xl font-mono-num font-extrabold text-emerald-400">
+                    ${w.lolos} <span class="text-xs sm:text-sm font-semibold text-slate-400">pcs</span>
+                  </div>
+                  <span class="inline-block mt-1 px-2.5 py-0.5 rounded-lg text-xs font-mono-num font-bold ${konversi.cls}">
+                    ${konversi.label}
+                  </span>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      /* Daftar Siswa dengan Reject */
+      const rejectWorkers = agg.workerStats
+        .filter((w) => w.reject > 0)
+        .sort((a, b) => b.reject - a.reject || a.index - b.index);
+
+      document.getElementById('reject-board-count').textContent = `${rejectWorkers.length} Siswa`;
       const rejectContainer = document.getElementById('reject-board-content');
 
       if (rejectWorkers.length === 0) {
         rejectContainer.innerHTML = `
-          <div class="w-full py-3 px-4 rounded-xl bg-emerald-500/10 text-emerald-400 font-mono-num font-semibold text-xs sm:text-sm text-center">
-            Zero Reject — Semua rakitan lolos QC
+          <div class="w-full py-3.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono-num font-bold text-sm sm:text-base text-center">
+            0 Reject
           </div>
         `;
       } else {
         rejectContainer.innerHTML = rejectWorkers
           .map(
             (w) => `
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 text-red-300 font-mono-num font-semibold text-xs">
-              <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+            <span class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 font-mono-num font-bold text-xs sm:text-sm">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span>
               <span>#${w.presensi} ${w.name} (${w.reject})</span>
             </span>
           `
@@ -695,12 +861,16 @@
       displayMode = 'daily';
       activeDateId = dateId;
       prevHeroLolos = null;
+      prevWorkerRejectMap = null;
+      dismissRejectSidebar();
       renderBoard();
     }
 
     function setDisplayMode(mode) {
       displayMode = mode;
       prevHeroLolos = null;
+      prevWorkerRejectMap = null;
+      dismissRejectSidebar();
       renderBoard();
     }
 
@@ -744,7 +914,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       startLiveClock();
       acquireWakeLock();
-      updateConnectionBadge();
       initRealtimeBoard();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     });
