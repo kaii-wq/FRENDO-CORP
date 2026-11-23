@@ -450,7 +450,7 @@
             <div>
               <h2 class="text-base font-bold text-white">Lembar Unit Produksi — Staf Produksi (Presensi #13–#35)</h2>
               <p class="text-xs text-slate-400 mt-0.5">
-                Target <span class="font-mono-num text-emerald-400">10 pcs/pekerja</span> • Rumus <span class="font-mono-num text-slate-200">(Pencapaian / 15) × 100%</span> • KKM <span class="font-mono-num text-slate-200">76</span>
+                <span id="tab1-target-worker-label" class="font-mono-num text-emerald-400">Target 10 pcs/pekerja</span> • Rumus <span id="tab1-formula-label" class="font-mono-num text-slate-200">(Pencapaian / 15) × 100%</span> • KKM <span class="font-mono-num text-slate-200">76</span>
               </p>
             </div>
 
@@ -572,7 +572,7 @@
         <div class="rounded-2xl bg-[#111622] border border-slate-800/80 p-4 sm:p-5 space-y-4">
           <div>
             <h2 class="text-base font-bold text-white">Rekap Konversi Nilai Staf Unit Produksi (#13–#35)</h2>
-            <p class="text-xs text-slate-400 mt-0.5">
+            <p id="tab3-recap-subtitle" class="text-xs text-slate-400 mt-0.5">
               Akumulasi 4 hari kerja (Target 10 pcs/hari • KKM = 76)
             </p>
           </div>
@@ -860,18 +860,40 @@
           />
         </div>
 
-        <div>
-          <label for="meta-target-input" class="block text-xs font-medium text-slate-400 mb-1.5">
-            Target Harian Kelas (pcs)
-          </label>
-          <input
-            id="meta-target-input"
-            type="number"
-            min="1"
-            required
-            class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-emerald-400 focus:outline-none focus:border-emerald-500/60"
-          />
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label for="meta-target-pekerja-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+              Target per Pekerja (pcs)
+            </label>
+            <input
+              id="meta-target-pekerja-input"
+              type="number"
+              min="1"
+              step="1"
+              required
+              oninput="syncTargetFromWorkerInput(this.value)"
+              class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-sky-400 focus:outline-none focus:border-sky-500/60"
+            />
+          </div>
+
+          <div>
+            <label for="meta-target-input" class="block text-xs font-medium text-slate-400 mb-1.5">
+              Target Harian Kelas (pcs)
+            </label>
+            <input
+              id="meta-target-input"
+              type="number"
+              min="1"
+              step="1"
+              required
+              oninput="syncWorkerFromClassTargetInput(this.value)"
+              class="no-spinner w-full px-3.5 py-2 rounded-xl bg-[#0B0F17] border border-slate-800 font-mono-num text-sm font-semibold text-emerald-400 focus:outline-none focus:border-emerald-500/60"
+            />
+          </div>
         </div>
+        <p class="text-[11px] font-mono-num text-slate-500 -mt-2">
+          Staf produksi aktif: <strong class="text-slate-300">23 orang</strong> • Otomatis sinkron dua arah.
+        </p>
 
         <div class="pt-3 flex items-center justify-between gap-2 border-t border-slate-800/70">
           <button
@@ -1031,7 +1053,7 @@
             <th class="text-center">Absen</th>
             <th class="text-right">Lolos QC</th>
             <th class="text-right">Reject</th>
-            <th class="text-right">% Prod (/15)</th>
+            <th class="text-right" id="print-prod-header">% Prod (/15)</th>
             <th class="text-center">Konversi Nilai</th>
           </tr>
         </thead>
@@ -1078,8 +1100,11 @@
   <script>
     const ROOT_REF_PATH = 'tefa_songsong';
     const LOCAL_STORAGE_KEY = 'tefa_songsong_v1_data';
+    const TARGET_PER_WORKER_STORAGE_KEY = 'tefa_target_per_pekerja';
     const SESSION_AUTH_KEY = 'tefa_admin_session_v1';
     const RESET_CONFIRM_PASSWORD = 'pipico';
+    const ACTIVE_PRODUCTION_STAFF_COUNT = 23;
+    const DEFAULT_TARGET_PER_WORKER = 10;
 
     const SCHEDULE_DAYS = [
       { id: '2026-11-23', shortLabel: '23 Nov 2026', dayName: 'Senin', fullLabel: '23 November 2026' },
@@ -1146,6 +1171,39 @@
     let filterRejectOnly = false;
     let currentUser = null;
 
+    function sanitizeTargetPerWorker(val, fallback = DEFAULT_TARGET_PER_WORKER) {
+      const num = Number(val);
+      if (Number.isFinite(num) && num > 0) return Math.round(num);
+      return fallback;
+    }
+
+    function readTargetPerWorkerFromStorage(fallback = DEFAULT_TARGET_PER_WORKER) {
+      try {
+        const raw = localStorage.getItem(TARGET_PER_WORKER_STORAGE_KEY);
+        if (raw !== null && raw !== '') {
+          const parsed = JSON.parse(raw);
+          return sanitizeTargetPerWorker(parsed, fallback);
+        }
+      } catch (_) {}
+      return fallback;
+    }
+
+    function writeTargetPerWorkerToStorage(value) {
+      const clean = sanitizeTargetPerWorker(value, DEFAULT_TARGET_PER_WORKER);
+      try {
+        localStorage.setItem(TARGET_PER_WORKER_STORAGE_KEY, String(clean));
+      } catch (_) {}
+      return clean;
+    }
+
+    function getTargetPerWorker() {
+      const fromMeta = dbState?.meta?.targetPerPekerja;
+      if (Number(fromMeta) > 0) return sanitizeTargetPerWorker(fromMeta, DEFAULT_TARGET_PER_WORKER);
+      const targetKelas = Number(dbState?.meta?.targetHarianKelas);
+      if (targetKelas > 0) return Math.max(1, Math.ceil(targetKelas / ACTIVE_PRODUCTION_STAFF_COUNT));
+      return readTargetPerWorkerFromStorage(DEFAULT_TARGET_PER_WORKER);
+    }
+
     function createDefaultDayData(zeroed = false) {
       const attendance = {};
       MANAGEMENT_PERSONNEL.forEach((p) => (attendance[p.pin] = 'Hadir'));
@@ -1187,15 +1245,22 @@
       SCHEDULE_DAYS.forEach((d) => {
         days[d.id] = createDefaultDayData(true);
       });
+      const targetPerPekerja = sanitizeTargetPerWorker(
+        existingMeta?.targetPerPekerja ?? readTargetPerWorkerFromStorage(DEFAULT_TARGET_PER_WORKER),
+        DEFAULT_TARGET_PER_WORKER
+      );
+      const targetHarianKelas =
+        Number(existingMeta?.targetHarianKelas) > 0
+          ? Number(existingMeta.targetHarianKelas)
+          : targetPerPekerja * ACTIVE_PRODUCTION_STAFF_COUNT;
+
       return {
         meta: {
           kelas: existingMeta?.kelas || 'X TE 2',
           ruang: existingMeta?.ruang || 'Ruang 84',
           instruktur: existingMeta?.instruktur || '',
-          targetHarianKelas:
-            Number(existingMeta?.targetHarianKelas) > 0
-              ? Number(existingMeta.targetHarianKelas)
-              : 230,
+          targetPerPekerja,
+          targetHarianKelas,
         },
         days,
       };
@@ -1206,12 +1271,14 @@
       SCHEDULE_DAYS.forEach((d) => {
         days[d.id] = createDefaultDayData(false);
       });
+      const targetPerPekerja = readTargetPerWorkerFromStorage(DEFAULT_TARGET_PER_WORKER);
       return {
         meta: {
           kelas: 'X TE 2',
           ruang: 'Ruang 84',
           instruktur: '',
-          targetHarianKelas: 230,
+          targetPerPekerja,
+          targetHarianKelas: targetPerPekerja * ACTIVE_PRODUCTION_STAFF_COUNT,
         },
         days,
       };
@@ -1230,12 +1297,32 @@
       const base = createDefaultDatabase();
       if (!raw || typeof raw !== 'object') return base;
 
+      const storedWorkerTarget = readTargetPerWorkerFromStorage(DEFAULT_TARGET_PER_WORKER);
+      const hasRawWorkerTarget = Number(raw.meta?.targetPerPekerja) > 0;
+      const hasRawClassTarget = Number(raw.meta?.targetHarianKelas) > 0;
+
+      let targetPerPekerja = storedWorkerTarget;
+      let targetHarianKelas = targetPerPekerja * ACTIVE_PRODUCTION_STAFF_COUNT;
+
+      if (hasRawWorkerTarget) {
+        targetPerPekerja = sanitizeTargetPerWorker(raw.meta.targetPerPekerja, storedWorkerTarget);
+        targetHarianKelas = hasRawClassTarget
+          ? Math.max(1, Number(raw.meta.targetHarianKelas))
+          : targetPerPekerja * ACTIVE_PRODUCTION_STAFF_COUNT;
+      } else if (hasRawClassTarget) {
+        targetHarianKelas = Math.max(1, Number(raw.meta.targetHarianKelas));
+        targetPerPekerja = Math.max(1, Math.ceil(targetHarianKelas / ACTIVE_PRODUCTION_STAFF_COUNT));
+      }
+
       base.meta = {
         kelas: raw.meta?.kelas ?? 'X TE 2',
         ruang: raw.meta?.ruang ?? 'Ruang 84',
         instruktur: raw.meta?.instruktur ?? '',
-        targetHarianKelas: Number(raw.meta?.targetHarianKelas) > 0 ? Number(raw.meta.targetHarianKelas) : 230,
+        targetPerPekerja,
+        targetHarianKelas,
       };
+
+      writeTargetPerWorkerToStorage(targetPerPekerja);
 
       SCHEDULE_DAYS.forEach((d) => {
         const dayRaw = raw.days?.[d.id] || {};
@@ -1388,6 +1475,10 @@
     }
 
     function persistDatabase(toastMessage = null) {
+      const targetPerPekerja = getTargetPerWorker();
+      dbState.meta.targetPerPekerja = targetPerPekerja;
+      writeTargetPerWorkerToStorage(targetPerPekerja);
+
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dbState));
       } catch (_) {}
@@ -1493,16 +1584,26 @@
       }
     });
 
-    // Aturan Konversi Nilai (Bagian D.3a Buku Pegangan, KKM = 76)
+    // Aturan Konversi Nilai fleksibel terhadap targetPerPekerja (KKM = 76)
     function calculateWorkerGrade(lolos, reject) {
       const l = Number(lolos) || 0;
       const r = Number(reject) || 0;
+      const targetPerPekerja = getTargetPerWorker();
+
       if (l === 0 && r === 0) return { label: '-', badgeClass: 'bg-slate-800/70 text-slate-400' };
-      if (l < 10) return { label: 'Tidak KKM', badgeClass: 'bg-red-500/10 text-red-400' };
-      if (l > 10 && r === 0) return { label: '100', badgeClass: 'bg-emerald-500/10 text-emerald-400' };
-      if (l > 10 && r > 0) return { label: '96', badgeClass: 'bg-sky-500/10 text-sky-400' };
-      if (l === 10 && r === 0) return { label: '86', badgeClass: 'bg-teal-500/10 text-teal-300' };
-      return { label: '76', badgeClass: 'bg-amber-500/10 text-amber-300' };
+      if (l > targetPerPekerja && r === 0) return { label: '100', badgeClass: 'bg-emerald-500/10 text-emerald-400' };
+      if (l > targetPerPekerja && r > 0) return { label: '96', badgeClass: 'bg-sky-500/10 text-sky-400' };
+      if (l === targetPerPekerja && r === 0) return { label: '86', badgeClass: 'bg-teal-500/10 text-teal-300' };
+      if (l === targetPerPekerja && r > 0) return { label: '76', badgeClass: 'bg-amber-500/10 text-amber-300' };
+      return { label: 'Tidak KKM', badgeClass: 'bg-red-500/10 text-red-400' };
+    }
+
+    function calculateProductivityPercent(lolos) {
+      const l = Number(lolos) || 0;
+      const targetPerPekerja = getTargetPerWorker();
+      const denominator = targetPerPekerja * 1.5;
+      if (denominator <= 0) return '0.0%';
+      return ((l / denominator) * 100).toFixed(1) + '%';
     }
 
     function getDayMetrics(dayId) {
@@ -1530,7 +1631,7 @@
         if ((day.attendance?.[pin] || 'Hadir') === 'Hadir') hadirCount += 1;
       });
 
-      const targetKelas = Number(dbState.meta.targetHarianKelas) || 230;
+      const targetKelas = Number(dbState.meta.targetHarianKelas) || getTargetPerWorker() * ACTIVE_PRODUCTION_STAFF_COUNT;
       const targetPct = targetKelas > 0 ? Math.round((totalLolos / targetKelas) * 100) : 0;
 
       return {
@@ -1592,10 +1693,11 @@
       document.getElementById('packing-verified-input').value = day.packingVerified || 0;
 
       const activeDayObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
+      const targetPerPekerja = getTargetPerWorker();
       document.getElementById('info-tanggal-lengkap').textContent = `${activeDayObj.dayName}, ${activeDayObj.fullLabel}`;
       document.getElementById('info-kelas').textContent = dbState.meta.kelas;
       document.getElementById('info-ruang').textContent = dbState.meta.ruang;
-      document.getElementById('info-target-kelas').textContent = `${dbState.meta.targetHarianKelas} pcs/hari`;
+      document.getElementById('info-target-kelas').textContent = `${dbState.meta.targetHarianKelas} pcs/hari (${targetPerPekerja} pcs/org)`;
       document.getElementById('info-instruktur').textContent = dbState.meta.instruktur || 'Belum diatur';
     }
 
@@ -1612,6 +1714,13 @@
     }
 
     function renderWorkersTable() {
+      const targetPerPekerja = getTargetPerWorker();
+      const capProd = Number((targetPerPekerja * 1.5).toFixed(2));
+      const workerLabelEl = document.getElementById('tab1-target-worker-label');
+      const formulaLabelEl = document.getElementById('tab1-formula-label');
+      if (workerLabelEl) workerLabelEl.textContent = `Target ${targetPerPekerja} pcs/pekerja`;
+      if (formulaLabelEl) formulaLabelEl.textContent = `(Pencapaian / ${capProd}) × 100%`;
+
       const tbody = document.getElementById('workers-table-body');
       const day = dbState.days[activeDateId];
       const query = (document.getElementById('search-worker-input')?.value || '').trim().toLowerCase();
@@ -1656,8 +1765,7 @@
               ? Number(wData.durasiMenit) || 0
               : computeMinutesBetween(wMulai, wSelesai);
 
-          // Rumus Buku Pegangan: (pencapaian produksi / 15) * 100%
-          const prodPct = ((lolos / 15) * 100).toFixed(1) + '%';
+          const prodPct = calculateProductivityPercent(lolos);
           const grade = calculateWorkerGrade(lolos, reject);
 
           return `
@@ -1790,12 +1898,19 @@
         buildRow(p, p.role)
       ).join('');
 
+      const targetPerPekerja = getTargetPerWorker();
       document.getElementById('attendance-staff-list').innerHTML = PRODUCTION_WORKERS.map((w) =>
-        buildRow(w, 'Staf Unit Produksi (Target 10 pcs)')
+        buildRow(w, `Staf Unit Produksi (Target ${targetPerPekerja} pcs)`)
       ).join('');
     }
 
     function renderRecapTab() {
+      const targetPerPekerja = getTargetPerWorker();
+      const subtitleEl = document.getElementById('tab3-recap-subtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = `Akumulasi 4 hari kerja (Target ${targetPerPekerja} pcs/hari • KKM = 76)`;
+      }
+
       const recapBody = document.getElementById('recap-4days-body');
       let sumUnit = 0;
       let sumLolos = 0;
@@ -1939,6 +2054,11 @@
       const day = dbState.days[activeDateId];
       const activeDayObj = SCHEDULE_DAYS.find((x) => x.id === activeDateId) || SCHEDULE_DAYS[0];
       const m = getDayMetrics(activeDateId);
+      const targetPerPekerja = getTargetPerWorker();
+      const capProd = Number((targetPerPekerja * 1.5).toFixed(2));
+
+      const prodHeaderEl = document.getElementById('print-prod-header');
+      if (prodHeaderEl) prodHeaderEl.textContent = `% Prod (/${capProd})`;
 
       document.getElementById('print-tanggal').textContent = activeDayObj.fullLabel;
       document.getElementById('print-kelas-ruang').textContent = `${dbState.meta.kelas} / ${dbState.meta.ruang}`;
@@ -2004,7 +2124,7 @@
           wData.durasiMenit !== undefined
             ? Number(wData.durasiMenit) || 0
             : computeMinutesBetween(wMulai, wSelesai);
-        const prod = ((lolos / 15) * 100).toFixed(1) + '%';
+        const prod = calculateProductivityPercent(lolos);
         const grade = calculateWorkerGrade(lolos, reject).label;
         const absen = day.attendance?.[w.pin] || 'Hadir';
         return `
@@ -2148,11 +2268,36 @@
       window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
     }
 
+    function syncTargetFromWorkerInput(rawVal) {
+      const num = Number(rawVal);
+      if (!Number.isFinite(num) || num <= 0) return;
+      const workerTarget = Math.max(1, Math.round(num));
+      const classInput = document.getElementById('meta-target-input');
+      if (classInput) {
+        classInput.value = String(workerTarget * ACTIVE_PRODUCTION_STAFF_COUNT);
+      }
+    }
+
+    function syncWorkerFromClassTargetInput(rawVal) {
+      const num = Number(rawVal);
+      if (!Number.isFinite(num) || num <= 0) return;
+      const classTarget = Math.max(1, Math.round(num));
+      const workerTarget = Math.max(1, Math.ceil(classTarget / ACTIVE_PRODUCTION_STAFF_COUNT));
+      const workerInput = document.getElementById('meta-target-pekerja-input');
+      if (workerInput) {
+        workerInput.value = String(workerTarget);
+      }
+    }
+
     function openSettingsModal() {
+      const targetPerPekerja = getTargetPerWorker();
+      const targetKelas = Number(dbState.meta.targetHarianKelas) || targetPerPekerja * ACTIVE_PRODUCTION_STAFF_COUNT;
+
       document.getElementById('meta-kelas-input').value = dbState.meta.kelas;
       document.getElementById('meta-ruang-input').value = dbState.meta.ruang;
       document.getElementById('meta-instruktur-input').value = dbState.meta.instruktur;
-      document.getElementById('meta-target-input').value = dbState.meta.targetHarianKelas;
+      document.getElementById('meta-target-pekerja-input').value = targetPerPekerja;
+      document.getElementById('meta-target-input').value = targetKelas;
 
       const modal = document.getElementById('settings-modal');
       modal.classList.remove('hidden');
@@ -2168,19 +2313,35 @@
 
     document.getElementById('settings-form').addEventListener('submit', (e) => {
       e.preventDefault();
+      const rawWorkerVal = Number(document.getElementById('meta-target-pekerja-input').value);
+      const rawClassVal = Number(document.getElementById('meta-target-input').value);
+
+      const targetPerPekerja =
+        Number.isFinite(rawWorkerVal) && rawWorkerVal > 0
+          ? Math.max(1, Math.round(rawWorkerVal))
+          : Number.isFinite(rawClassVal) && rawClassVal > 0
+          ? Math.max(1, Math.ceil(rawClassVal / ACTIVE_PRODUCTION_STAFF_COUNT))
+          : DEFAULT_TARGET_PER_WORKER;
+
+      const targetHarianKelas =
+        Number.isFinite(rawClassVal) && rawClassVal > 0
+          ? Math.max(1, Math.round(rawClassVal))
+          : targetPerPekerja * ACTIVE_PRODUCTION_STAFF_COUNT;
+
       dbState.meta.kelas = document.getElementById('meta-kelas-input').value.trim() || 'X TE 2';
       dbState.meta.ruang = document.getElementById('meta-ruang-input').value.trim() || 'Ruang 84';
       dbState.meta.instruktur = document.getElementById('meta-instruktur-input').value.trim();
-      dbState.meta.targetHarianKelas = Math.max(
-        1,
-        Number(document.getElementById('meta-target-input').value) || 230
-      );
+      dbState.meta.targetPerPekerja = targetPerPekerja;
+      dbState.meta.targetHarianKelas = targetHarianKelas;
+
+      writeTargetPerWorkerToStorage(targetPerPekerja);
       closeSettingsModal();
-      persistDatabase('Identitas kelas disimpan');
+      persistDatabase('Identitas kelas & target disimpan');
     });
 
     function exportDayCSV() {
       const day = dbState.days[activeDateId];
+      const capProd = Number((getTargetPerWorker() * 1.5).toFixed(2));
       const lines = [
         [
           'No. Presensi',
@@ -2191,7 +2352,7 @@
           'Absensi',
           'Lolos QC',
           'Reject',
-          '% Produktivitas (/15)',
+          `% Produktivitas (/${capProd})`,
           'Konversi Nilai',
         ].join(','),
       ];
@@ -2206,7 +2367,7 @@
           wData.durasiMenit !== undefined
             ? Number(wData.durasiMenit) || 0
             : computeMinutesBetween(wMulai, wSelesai);
-        const prodPct = ((lolos / 15) * 100).toFixed(1);
+        const prodPct = ((lolos / (getTargetPerWorker() * 1.5)) * 100).toFixed(1);
         const grade = calculateWorkerGrade(lolos, reject).label;
         const absen = day.attendance?.[w.pin] || 'Hadir';
 
